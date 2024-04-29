@@ -204,6 +204,10 @@ pdVelocityNav = [pdVelocityUp, pdVelocityDown]
 colPresetNav  = [cWhite, cDimWhite]
 
 #nav for PATTERNS and DRUMS
+pdRename = 46
+colRename = cOrange
+
+
 pdPresetPrev = 47
 pdPresetNext = 63
 pdPresetNav = [pdPresetPrev, pdPresetNext]

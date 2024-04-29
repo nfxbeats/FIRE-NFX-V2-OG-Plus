@@ -381,6 +381,7 @@ class TnfxNavigationSet:
         self.ColorPicker = False 
         self.CustomMacros = False
         self.BlinkButtons = False
+        self.Rename = False
 
     def SetNavSet(self, navSet):
         self.NavSetID = navSet
@@ -389,6 +390,7 @@ class TnfxNavigationSet:
             self.ChanNav = True
             self.SnapNav = True
             self.PresetNav = True
+            self.Rename = True
         elif navSet == nsPianoRoll:
             self.ChanNav = True
             self.PianoRollNav = True

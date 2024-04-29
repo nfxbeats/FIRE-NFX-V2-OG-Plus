@@ -15,20 +15,20 @@ class TnfxColorMap:
         self.G = 0
         self.B = 0
 
-_ColorMap = []
+ColorMap = []
 
 # init the color map
 for p in range(64):
-    _ColorMap.append(TnfxColorMap(p, 0, 0))
+    ColorMap.append(TnfxColorMap(p, 0, 0))
 
 def getPadColor(padIdx):
-    return _ColorMap[padIdx].PadColor
+    return ColorMap[padIdx].PadColor
 
 
 def SetPadColorBuffer(idx, col, dimFactor, flushBuffer = False, bSave = True):
-    global _ColorMap
+    global ColorMap
     if(col == -1):
-        col = _ColorMap[idx].PadColor
+        col = ColorMap[idx].PadColor
 
     # r = (col & 0x7F0000) >> 16
     # g = (col & 0x007F00) >> 8
@@ -44,11 +44,11 @@ def SetPadColorBuffer(idx, col, dimFactor, flushBuffer = False, bSave = True):
             b = b >> 1
 
     if(bSave):
-        _ColorMap[idx].PadColor = newCol 
-        _ColorMap[idx].DimFactor = dimFactor
-        _ColorMap[idx].R = r
-        _ColorMap[idx].G = g
-        _ColorMap[idx].B = b
+        ColorMap[idx].PadColor = newCol 
+        ColorMap[idx].DimFactor = dimFactor
+        ColorMap[idx].R = r
+        ColorMap[idx].G = g
+        ColorMap[idx].B = b
     
     if(flushBuffer):
         FlushColorMap()
@@ -57,7 +57,7 @@ def FlushColorMap():
     MsgIDSetRGBPadLedState = 0x65
     dataOut = bytearray(4 * 64)
     bufOffs = 0
-    for cMap in _ColorMap:
+    for cMap in ColorMap:
         dataOut[bufOffs] = cMap.PadIndex
         dataOut[bufOffs + 1] = cMap.R
         dataOut[bufOffs + 2] = cMap.G
@@ -66,10 +66,10 @@ def FlushColorMap():
     SendMessageToDevice(MsgIDSetRGBPadLedState, len(dataOut), dataOut)
 
 def getColorMap():
-    return _ColorMap
+    return ColorMap
 
 def SetPadColor(idx, col, dimFactor, bSaveColor = True, bUseBuffer = False, dimMult = 2.5):
-    global _ColorMap
+    global ColorMap
     if(bUseBuffer):
         SetPadColorBuffer(idx, col, dimFactor, False)
     else:
@@ -97,20 +97,20 @@ def AdjustedFirePadColor(color):
 
 def SetPadColorDirect(idx, col, dimFactor, bSaveColor = True, dimMult = 2.5):
     # if col is -1, it will remember the previously saved color for that idx.
-    global _ColorMap
+    global ColorMap
 
     if(idx < 0) or (idx > 63):
         return
 
     if(col == -1): # reads the stored color
-        col = _ColorMap[idx].PadColor
-        dimFactor = _ColorMap[idx].DimFactor
+        col = ColorMap[idx].PadColor
+        dimFactor = ColorMap[idx].DimFactor
 
     col = FLColorToPadColor(col, 1)
 
     if(bSaveColor):
-        _ColorMap[idx].PadColor = col 
-        _ColorMap[idx].DimFactor = dimFactor
+        ColorMap[idx].PadColor = col 
+        ColorMap[idx].DimFactor = dimFactor
     
     newCol, r, g, b = AdjustedFirePadColor(col)
 

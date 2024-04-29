@@ -22,6 +22,11 @@ import fireNFX_Anim as anim
 def enum(**enums):
      return type('Enum', (), enums)
 
+dimDim = Settings.DIM_DIM
+dimNormal = Settings.DIM_NORMAL
+dimBright = Settings.DIM_BRIGHT
+dimDefault = dimNormal
+dimFull = 0 
 
 # snap defs are in MIDI.py aka Snap_Cell, Snap_line, etc
 SnapModes = enum(   Line = 0,
@@ -538,7 +543,7 @@ def Shade(color, mul = 1.1, offs = 0):
             return color1
 
 def AnimOff(padIdx, color, steps = 16, wait = 0.1):
-    OrigColor = _ColorMap[padIdx].PadColor 
+    OrigColor = ColorMap[padIdx].PadColor 
     Color1 = cWhite # getShade(color, shLight)
     Color2 = cOff # getShade(color, shDim)
     for step in range(steps):
@@ -548,7 +553,7 @@ def AnimOff(padIdx, color, steps = 16, wait = 0.1):
         time.sleep(wait)
 
 def AnimOn(padIdx, color, steps = 16, wait = 0.1):
-    OrigColor = _ColorMap[padIdx].PadColor 
+    OrigColor = ColorMap[padIdx].PadColor 
     Color1 = cWhite # getShade(color, shLight)
     Color2 = cOff # getShade(color, shDim)
     for step in range(steps):
@@ -818,6 +823,31 @@ def printts(text):
     
     # Update the last_time variable
     last_time = current_time
+
+def pseudo_random(seed=None):
+    if seed is not None:
+        # Use provided seed
+        value = seed
+    else:
+        # Use current time as seed
+        value = int(time.time() * 1000)
+    
+    # Linear congruential generator parameters
+    a = 1103515245
+    c = 12345
+    m = 2**31
+    
+    # Generate pseudo-random number
+    value = (a * value + c) % m
+    
+    return value
+
+def random_integer(n, seed=None):
+    if n <= 0:
+        raise ValueError("n must be a positive integer")
+    
+    rand_value = pseudo_random(seed)
+    return rand_value % (n + 1)  # Modulo n+1 to get a number between 0 and n
 
 
 

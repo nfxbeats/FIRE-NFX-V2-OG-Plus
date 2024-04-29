@@ -81,6 +81,7 @@ def InitScales():
     addScale('Min-Penta', [0, 3, 5, 7, 10, -1, -1, -1, -1, -1, -1, -1, -1], 'Faves')
     # addScale('Min-Harmonic',  [0, 2, 3, 5, 7, 8, 11, -1, -1, -1, -1, -1, -1])
     # addScale('Min-Melodic',   [0, 2, 3, 5, 7, 9, 11, -1, -1, -1, -1, -1, -1])
+    addScale('Min-Melodic2',   [0, 2, 3, 5, 7, 9, 11, 12, 10, 8, 7, 5, -1]) # added by RoyalCities from reddit
     # addScale('Whole Tone', [0, 2, 4, 6, 8, 10, -1, -1, -1, -1, -1, -1, -1])
     # addScale('Diminished', [0, 2, 3, 5, 6, 8, 9, 11, -1, -1, -1, -1, -1])
     # addScale('Japinsen', [0,1, 5, 7, 10, -1, -1, -1, -1, -1, -1, -1, -1])

@@ -1,5 +1,7 @@
 # nfx
 fireNFX_UserSettings.py
+fireNFX_UserMacros.py 
+old_device_FIRE-NFX.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -157,6 +157,10 @@ class TnfxDefaultSettings:
 
         self.SHOW_CHANNEL_MUTES = True
 
+        self.AUTO_COLOR_ENABLED = False
+        self.AUTO_COLORS = {}
+
+
 # DO NOT EDIT BELOW:
 Settings = TnfxDefaultSettings()
 try:

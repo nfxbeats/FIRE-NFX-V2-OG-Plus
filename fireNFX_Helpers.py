@@ -58,7 +58,10 @@ def GetMixerGenParamVal(offset, trkNum = -1, slotIndex = 0):
     if(trkNum == -1):
         trkNum = mixer.trackNumber()
     recEventID = mixer.getTrackPluginId(trkNum, slotIndex)
-    return general.processRECEvent(recEventID + offset, 0, midi.REC_GetValue)
+    try:
+        return general.processRECEvent(recEventID + offset, 0, midi.REC_GetValue)
+    except:
+        return None
 
 
 # GetMixerGenParamVal((REC_Plug_General_First, 0, 0)
