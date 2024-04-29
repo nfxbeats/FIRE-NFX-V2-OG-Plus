@@ -1,4 +1,4 @@
-# FIRE-NFX-V2
+# FIRE-NFX-V2-OG+
 The most advanced MIDI interface for FL Studio and the Akai FIRE ever created.  
 <br>
 ## Intro and Installation
@@ -41,25 +41,25 @@ If you prefer to leave you file explorer open with this folder open, it might ma
 <br>
 
 ## *Script File Download*
-Once you have the folder properly identified, you can download the files from the the "master" or from the "releases": 
+Once you have the folder properly identified, you can download the files from the the "main" or from the "releases": 
 
-### Master Branch
-The master is the lastest of the latest, and may have newer/improved features but also potential new bugs that go with the devlopment of the features. You can get the master file here: https://github.com/nfxbeats/FIRE-NFX-V2/archive/refs/heads/master.zip
+### Main Branch
+The "main branch" is the lastest of the latest, and may have newer/improved features but also potential new bugs that go with the devlopment of the features. You can get the main branch files here: https://github.com/nfxbeats/FIRE-NFX-V2-OG-/archive/refs/heads/main.zip
 
 ### Releases 
-The release version is usually an older version that runs smoothly, but may be lacking in up to date features and fixes. You can get the latest release (and previous releases, if needed) from here: https://github.com/nfxbeats/FIRE-NFX-V2/releases 
+The release version is usually an older version that runs smoothly, but may be lacking in up to date features and fixes. You can get the latest release (and previous releases, if needed) from here: https://github.com/nfxbeats/FIRE-NFX-V2-OG-/releases 
 
 Find the ZIP download for the latest version. It should be the first link labelled as "**Source code (zip)** " on the page.
 
 Pick a version, (master or release) and then download it and open it in a new window.
 
-In the ZIP file you downloaded, you should open it and go into the first folder it may be named something similar to **FIRE-NFX-V2-Beta-1**. Inside this folder you will see several files. The most important file is the script file named **device_FIRE-NFX.py**. If you see this file, this is the correct source folder.
+In the ZIP file you downloaded, you should open it and go into the first folder it may be named something similar to **FIRE-NFX-V2-OG-1**. Inside this folder you will see several files. The most important file is the script file named **device_FIRE-NFX-V2-OG.py**. If you see this file, this is the correct source folder.
 
-Next, copy/drag all of the files from this ZIP folder to your **Script Destination Folder** named "FIRE-NFX-V2" that you created in the previous step.
+Next, copy/drag all of the files from this ZIP folder to your **Script Destination Folder** named "FIRE-NFX-V2-OG" that you created in the previous step.
 
 In my example, the files would be copied into:
 
-    C:\users\nfx\image-line\FL Studio\Settings\Hardware\FIRE-NFX-V2\
+    C:\users\nfx\image-line\FL Studio\Settings\Hardware\FIRE-NFX-V2-OG\
 
 ## *First Time Activating The Script*
 At this point you should have the files downloaded and copied into the correct folder and are ready to activate the script in FL Studio.
@@ -72,9 +72,9 @@ At this point you should have the files downloaded and copied into the correct f
 
 * click on the **Controller Type** drop down.
 
-* On the drop down's right side should be listed all the "User" scripts. Look for and select "FIRE-NFX-V2 (user)" from the right side of the list
+* On the drop down's should be listed all the "User" scripts. Look for and select "FIRE-NFX-V2-OG+ (user)" from the right side of the list
 
-If you don't see the "FIRE-NFX-V2 (user)" device, it means FL Studio does not see the file. You can try restarting FL Studio or double check your **User Data Folder** location. 
+If you don't see the "FIRE-NFX-V2-OG+ (user)" device, it means FL Studio does not see the file. You can try restarting FL Studio or double check your **User Data Folder** location. 
 
 If you had no errors, you should be good to go! Remember, you can switch back the original script in the **Controller Type** drop down at anytime.
 
