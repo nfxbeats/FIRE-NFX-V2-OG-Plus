@@ -31,11 +31,11 @@ So using my example, I would go to:
 
 You may see a few folders in this location already for other devices.
 
-Next, inside of the **MIDI Hardware Folder**, you need to create a folder named **FIRE-NFX-V2** if it doesn't already exist.
+Next, inside of the **MIDI Hardware Folder**, you need to create a folder named **FIRE-NFX-V2-OG-Plus** if it doesn't already exist.
 
-This is our **Script Destination Folder** for the FIRE-NFX-V2 files (as an example, yours will be different):
+This is our **Script Destination Folder** for the FIRE-NFX-V2-OG-Plus files (as an example, yours will be different):
 
-    C:\users\nfx\image-line\FL Studio\Settings\Hardware\FIRE-NFX-V2\
+    C:\users\nfx\image-line\FL Studio\Settings\Hardware\FIRE-NFX-V2-OG-Plus\
 
 If you prefer to leave you file explorer open with this folder open, it might make copying the files easier later.  
 <br>
@@ -44,22 +44,22 @@ If you prefer to leave you file explorer open with this folder open, it might ma
 Once you have the folder properly identified, you can download the files from the the "main" or from the "releases": 
 
 ### Main Branch
-The "main branch" is the lastest of the latest, and may have newer/improved features but also potential new bugs that go with the devlopment of the features. You can get the main branch files here: https://github.com/nfxbeats/FIRE-NFX-V2-OG-/archive/refs/heads/main.zip
+The "main branch" is the lastest of the latest, and may have newer/improved features but also potential new bugs that go with the devlopment of the features. You can get the main branch files here: https://github.com/nfxbeats/FIRE-NFX-V2-OG-Plus/archive/refs/heads/main.zip
 
 ### Releases 
-The release version is usually an older version that runs smoothly, but may be lacking in up to date features and fixes. You can get the latest release (and previous releases, if needed) from here: https://github.com/nfxbeats/FIRE-NFX-V2-OG-/releases 
+The release version is usually an older version that runs smoothly, but may be lacking in up to date features and fixes. You can get the latest release (and previous releases, if needed) from here: https://github.com/nfxbeats/FIRE-NFX-V2-OG-Plus/releases 
 
 Find the ZIP download for the latest version. It should be the first link labelled as "**Source code (zip)** " on the page.
 
 Pick a version, (master or release) and then download it and open it in a new window.
 
-In the ZIP file you downloaded, you should open it and go into the first folder it may be named something similar to **FIRE-NFX-V2-OG-1**. Inside this folder you will see several files. The most important file is the script file named **device_FIRE-NFX-V2-OG.py**. If you see this file, this is the correct source folder.
+In the ZIP file you downloaded, you should open it and go into the first folder it may be named something similar to **FIRE-NFX-V2-OG-1**. Inside this folder you will see several files. The most important file is the script file named **device_FIRE__NFX__V2__OG_plus.py**. If you see this file, this is the correct source folder.
 
-Next, copy/drag all of the files from this ZIP folder to your **Script Destination Folder** named "FIRE-NFX-V2-OG" that you created in the previous step.
+Next, copy/drag all of the files from this ZIP folder to your **Script Destination Folder** named "FIRE-NFX-V2-OG-Plus" that you created in the previous step.
 
 In my example, the files would be copied into:
 
-    C:\users\nfx\image-line\FL Studio\Settings\Hardware\FIRE-NFX-V2-OG\
+    C:\users\nfx\image-line\FL Studio\Settings\Hardware\FIRE-NFX-V2-OG-Plus\
 
 ## *First Time Activating The Script*
 At this point you should have the files downloaded and copied into the correct folder and are ready to activate the script in FL Studio.
@@ -72,9 +72,9 @@ At this point you should have the files downloaded and copied into the correct f
 
 * click on the **Controller Type** drop down.
 
-* On the drop down's should be listed all the "User" scripts. Look for and select "FIRE-NFX-V2-OG+ (user)" from the right side of the list
+* On the drop down's should be listed all the "User" scripts. Look for and select "FIRE-NFX-V2-OG+" from the right side of the list
 
-If you don't see the "FIRE-NFX-V2-OG+ (user)" device, it means FL Studio does not see the file. You can try restarting FL Studio or double check your **User Data Folder** location. 
+If you don't see the "FIRE-NFX-V2-OG+" device, it means FL Studio does not see the file. You can try restarting FL Studio or double check your **User Data Folder** location. 
 
 If you had no errors, you should be good to go! Remember, you can switch back the original script in the **Controller Type** drop down at anytime.
 
