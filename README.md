@@ -1,13 +1,19 @@
 # FIRE-NFX-V2-OG+
 The most advanced MIDI interface for FL Studio and the Akai FIRE ever created.  
-<br>
-## Intro and Installation
+
+This script consists of two scripts in one.
+
+**FIRE-NFX-V2** - is the advanced script that does not use the step sequncer mode but does provide many advances features and acts as a control surface.
+
+**FIRE-NFX-OG+** - is the original Akai FIRE script with some minor modifications. This one does allow fo rthe step sequnceing modes but does not have the advanced features of FIRE-NFX-V2
+
+Once installed, pressing SHIFT+ALT+REC and releasing on the Akai FIRE will change modes.
+
+## *Intro and Installation*
 
 Please read each following section for proper set up and usage. It is vital you can identify the proper folders and can download and copy files to be sucessful at installation.  
 
 This script requires FL Studio 20.9 or greater and an Akai FIRE Midi device.
-  
-  <br>  
 
 ## *User Data Folder*
 
@@ -38,7 +44,6 @@ This is our **Script Destination Folder** for the FIRE-NFX-V2-OG-Plus files (as 
     C:\users\nfx\image-line\FL Studio\Settings\Hardware\FIRE-NFX-V2-OG-Plus\
 
 If you prefer to leave you file explorer open with this folder open, it might make copying the files easier later.  
-<br>
 
 ## *Script File Download*
 Once you have the folder properly identified, you can download the files from the the "main" or from the "releases": 
@@ -51,7 +56,7 @@ The release version is usually an older version that runs smoothly, but may be l
 
 Find the ZIP download for the latest version. It should be the first link labelled as "**Source code (zip)** " on the page.
 
-Pick a version, (master or release) and then download it and open it in a new window.
+Pick a version, (main or release) and then download it and open it in a new window.
 
 In the ZIP file you downloaded, you should open it and go into the first folder it may be named something similar to **FIRE-NFX-V2-OG-1**. Inside this folder you will see several files. The most important file is the script file named **device_FIRE__NFX__V2__OG_plus.py**. If you see this file, this is the correct source folder.
 
@@ -77,6 +82,21 @@ At this point you should have the files downloaded and copied into the correct f
 If you don't see the "FIRE-NFX-V2-OG+" device, it means FL Studio does not see the file. You can try restarting FL Studio or double check your **User Data Folder** location. 
 
 If you had no errors, you should be good to go! Remember, you can switch back the original script in the **Controller Type** drop down at anytime.
+
+## *Switching Operating Modes* (Optional)
+This version of the script has a slightly updated original script available. This means that you can go back to the old step sequencer style script of the original Fire release. To toggle between the modes, press SHIFT-ALT-REC and let go. Please not ethat when using the old script mode you only have the original features available as well.
+
+## *User Settings and User Macros* (Optional)
+To add your own custom user settings or use user macros, you need to run the ```MakeUserFiles.bat``` file (Windows only) and they will be created for you. 
+
+Alternatively, You can manually make the files by renaming the files like this:
+
+|Original Filename| |New Filename|
+|-----------------|-|------------|
+|```fireNFX_Settings.py```| rename to |```fireNFX_UserSettings.py```|
+|```fireNFX_Macros.py```| renamed to |```fireNFXUserMacros.py```|
+
+There is text inside each of the files to provide guidance on how to edit them properly.
 
 ## *Finally....*
 You can find basic video tutorials on each mode here:  
