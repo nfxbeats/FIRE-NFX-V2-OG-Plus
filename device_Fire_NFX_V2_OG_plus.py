@@ -7,6 +7,7 @@
 from fireNFX_Defs import *
 from FIRE_NFX_OG_plus import * 
 from FIRE_NFX_V2 import *
+from fireNFX_DefaultSettings import Settings 
 
 FireMode = 0 
 _ShiftHeld = False
@@ -16,6 +17,10 @@ FireOG = TFire()
 FireNFX = TFireNFX() 
 
 Fire = FireNFX
+
+print('Starting up', Settings.STARTINOG)
+if Settings.STARTINOG:
+    Fire = FireOG
 
 def ToggleFireMode():
     global FireMode
@@ -121,3 +126,6 @@ def OnFirstConnect():
 
 def OnWaitingForInput():
     Fire.OnWaitingForInput() 
+
+
+

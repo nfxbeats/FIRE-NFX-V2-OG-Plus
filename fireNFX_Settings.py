@@ -26,6 +26,8 @@ class TnfxUserSettings(TnfxDefaultSettings):
         self.PATTERN_NAME = "{}-Pattern" #  the {} will be replaced with the pattern number
         self.AUTO_SWITCH_KNOBMODE = True
         self.AUTO_MAP_KNOWN_PARAMS_TO_USER_KNOBS = False
+        self.STARTINOG = False
+        
 
 
 

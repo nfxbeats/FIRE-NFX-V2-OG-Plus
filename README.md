@@ -99,7 +99,11 @@ Alternatively, You can manually make the files by renaming the files like this:
 There is text inside each of the files to provide guidance on how to edit them properly.
 
 ## *Finally....*
-You can find basic video tutorials on each mode here:  
+A 30 minute demo of some of the features in FIRE-NFX-V2 (2024):
+
+[![FireNFX V2](https://i9.ytimg.com/vi_webp/i6euDmrA4wk/mq2.webp?sqp=CJSMwbEG-oaymwEmCMACELQB8quKqQMa8AEB-AH-CYAC0AWKAgwIABABGEsgYShlMA8=&rs=AOn4CLCzL1PGv678HFHTjQCmKml3N--K6w)](http://www.youtube.com/watch?v=i6euDmrA4wk "FIRE-NFX-V2")
+
+You can find some older basic video tutorials on each mode here (2023):  
 * [FIRE-NFX V2.0 Mode Usage Playlist at YouTube](
 https://www.youtube.com/watch?v=OioXZP5parw&list=PLcoTHKe9_nBqurVeWsaSKxhbmhQIU3xRH) (recommended)
 

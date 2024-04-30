@@ -160,6 +160,8 @@ class TnfxDefaultSettings:
         self.AUTO_COLOR_ENABLED = False
         self.AUTO_COLORS = {}
 
+        self.STARTINOG = False
+
 
 # DO NOT EDIT BELOW:
 Settings = TnfxDefaultSettings()
