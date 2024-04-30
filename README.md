@@ -89,12 +89,12 @@ This version of the script has a slightly updated original script available. Thi
 ## *User Settings and User Macros* (Optional)
 To add your own custom user settings or use user macros, you need to run the ```MakeUserFiles.bat``` file (Windows only) and they will be created for you. 
 
-Alternatively, You can manually make the files by renaming the files like this:
+Alternatively, You can manually make the files by copy/renaming the files like this:
 
 |Original Filename| |New Filename|
 |-----------------|-|------------|
-|```fireNFX_Settings.py```| rename to |```fireNFX_UserSettings.py```|
-|```fireNFX_Macros.py```| renamed to |```fireNFXUserMacros.py```|
+|```fireNFX_Settings.py```| renamed to |```fireNFX_UserSettings.py```|
+|```fireNFX_Macros.py```| renamed to |```fireNFX_UserMacros.py```|
 
 There is text inside each of the files to provide guidance on how to edit them properly.
 
@@ -110,7 +110,7 @@ https://www.youtube.com/watch?v=OioXZP5parw&list=PLcoTHKe9_nBqurVeWsaSKxhbmhQIU3
 * [Google Slideshow used in video presentation](https://docs.google.com/presentation/d/18H4eEFmZKqKtpXtdgnVxO4Pf-vFTQKxcoGKxqe7uSs4/edit#slide=id.g187abea832f_0_2) (incomplete but very useful as an intro)
 
 Please leave me feedback/bug reports on one of the following:  
-* [Official FL Studio MIDI Scripting Forum Thread](https://forum.image-line.com/viewtopic.php?f=1994&t=284003)
+* [Official FL Studio MIDI Scripting Forum Thread](https://forum.image-line.com/viewtopic.php?p=1944203#p1944180)
 * [/r/warbeats subreddit](https://reddit.com/r/warbeats/) 
 
 ## *Credits*
