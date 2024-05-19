@@ -3,7 +3,7 @@
 #
 # author: Nelson F. Fernandez Jr. <nfxbeats@gmail.com>
 #
-
+import sys 
 from fireNFX_Defs import *
 from FIRE_NFX_OG_plus import * 
 from FIRE_NFX_V2 import *
@@ -22,6 +22,34 @@ print('Starting up', Settings.STARTINOG)
 if Settings.STARTINOG:
     Fire = FireOG
 
+
+def CallEx(func, *args, **kwargs):
+    try:
+        # Execute the provided function with arguments
+        return func(*args, **kwargs)
+    except Exception as e:
+        # Get the traceback object from the exception
+        tb = e.__traceback__
+        
+        # Traverse the traceback to find the last frame
+        while tb.tb_next:
+            tb = tb.tb_next
+        
+        # Extract details from the traceback frame
+        filename = tb.tb_frame.f_code.co_filename
+        line_number = tb.tb_lineno
+        func_name = tb.tb_frame.f_code.co_name
+        
+        # Print the exception details
+        print("======================================================")
+        print(f"An error occurred: {e}")
+        print(f"Exception type: {type(e).__name__}")
+        print(f"File: {filename}")
+        print(f"Line number: {line_number}")
+        print(f"Function name: {func_name}")
+        print("======================================================")
+
+
 def ToggleFireMode():
     global FireMode
     global Fire 
@@ -36,7 +64,7 @@ def ToggleFireMode():
         FireMode = 0 
 
 def OnInit():
-    Fire.OnInit()
+    CallEx(Fire.OnInit)
 
 def OnDeInit():
     Fire.OnDeInit()
