@@ -98,7 +98,7 @@ def OnMidiMsg(event):
     Fire.OnMidiMsg(event)
 
 def OnRefresh(Flags):
-    Fire.OnRefresh(Flags)
+    CallEx(Fire.OnRefresh, Flags) #Fire.OnRefresh(Flags)
 
 def OnUpdateLiveMode(LastTrackNum):
     Fire.OnUpdateLiveMode(1, LastTrackNum)

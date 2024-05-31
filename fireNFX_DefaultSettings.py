@@ -162,6 +162,8 @@ class TnfxDefaultSettings:
 
         self.STARTINOG = False
 
+        self.MUTE_PLTRACK_IMMEDIATELY = True 
+
 
 # DO NOT EDIT BELOW:
 Settings = TnfxDefaultSettings()

@@ -10,7 +10,7 @@
 # thanks to GeorgBit (#GS comments in code) for velocity curve for accent mode featue.
 #
 
-VERSION = "2.2024.0422"
+VERSION = "2.2024.0531"
 print('VERSION ' + VERSION)   
 
 import device
@@ -411,7 +411,7 @@ class TFireNFX():
         global ignoreNextMixerRefresh
         global FollowChannelFX
 
-        #print('OnRefresh', flags)
+        # print('OnRefresh', flags)
         if(flags == HW_CustomEvent_ShiftAlt):
             # called by HandleShiftAlt
             toptext = ''
@@ -950,10 +950,16 @@ class TFireNFX():
             if(padNum in plPadsA):       
                 playlist.selectTrack(flIdx)
             if(padNum in plPadsB):
+                patNum = patterns.patternNumber() 
                 if(ShiftHeld):
                     playlist.soloTrack(flIdx)
                 else:
                     playlist.muteTrack(flIdx)
+
+                #workaround 
+                if Settings.MUTE_PLTRACK_IMMEDIATELY:
+                    patterns.jumpToPattern(patNum+1)
+                    patterns.jumpToPattern(patNum)
 
             self.UpdatePlaylistMap()
         self.RefreshPlaylist()
@@ -3173,9 +3179,9 @@ class TFireNFX():
 
     def RefreshProgress(self):
         if(PadMode.Mode == MODE_PATTERNS) and (self.isPlaylistMode(self)):
-            if len(ProgressMapSong) == 0:
-                self.UpdateMarkerMap()
-                self.UpdateProgressMap()
+            # if len(ProgressMapSong) == 0:
+            #     self.UpdateMarkerMap()
+            #     self.UpdateProgressMap()
             
             progMap = ProgressMapSong
             songLenBars = transport.getSongLength(SONGLENGTH_BARS)
