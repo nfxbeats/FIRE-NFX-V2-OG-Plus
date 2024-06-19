@@ -15,6 +15,7 @@
 #   valid colors are: 
 #       cWhite, cBlue, cGreen, cRed, cYellow, cCyan, cPurple, cOrange, cMagenta and cOff 
 #
+import fireNFX_Persist as persist
 from fireNFX_Colors import *
 from fireNFX_Defs import NotesListFlats, NotesListSharps
 class TnfxDefaultSettings:
@@ -132,7 +133,7 @@ class TnfxDefaultSettings:
 
         self.STARTUP_TEXT_TOP = "-={FIRE-NFX}=-"
         self.STARTUP_TEXT_BOT = "Version 2.0"
-        self.STARTUP_FL_HINT = 'FIRE-NFX-V2 loaded.'
+        self.STARTUP_FL_HINT = '^c FIRE-NFX-V2'
 
         self.DBL_TAP_DELAY_MS = 220
         self.DBL_TAP_ZOOM = 4
@@ -167,10 +168,12 @@ class TnfxDefaultSettings:
 
 # DO NOT EDIT BELOW:
 Settings = TnfxDefaultSettings()
-try:
-    from fireNFX_UserSettings import TnfxUserSettings
-    Settings = TnfxUserSettings()
-    print('User settings found.')
-except ImportError:
-    print('User settings NOT found. Using defaults.')# Failed to import - assume they don't have custom settings
-
+if not persist.load_object(Settings, 'Settings.json'):
+    try:
+        from fireNFX_UserSettings import TnfxUserSettings
+        Settings = TnfxUserSettings()
+        print('User settings found.')
+    except ImportError:
+        print('User settings NOT found. Using defaults.')# Failed to import - assume they don't have custom settings
+else:
+    print('Settings.json found and loaded.')

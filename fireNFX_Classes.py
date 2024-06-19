@@ -8,6 +8,7 @@ import channels
 import playlist 
 import mixer
 import midi 
+import general 
 from fireNFX_Helpers import GetMixerGenParamVal
 
 def clonePluginParams(srcPlugin, destPlugin):
@@ -272,6 +273,10 @@ class TnfxMixerEffectSlot:
         self.Muted = GetMixerGenParamVal(midi.REC_Plug_Mute, self.TrackNumber, self.SlotIndex) == 0
         self.MixLevel = GetMixerGenParamVal(midi.REC_Plug_MixLevel, self.TrackNumber, self.SlotIndex)
         self.Used = plugins.isValid(self.TrackNumber, self.SlotIndex)
+        if (general.getVersion() >= 32):
+            self.Color = mixer.getSlotColor(self.TrackNumber, self.SlotIndex)
+        else:
+            self.Color = 0xFFFFFF
         # if(self.Used):
         #     self.Color = plugins.getColor(self.TrackNumber, self.SlotIndex, midi.GC_BackgroundColor, 0)
 

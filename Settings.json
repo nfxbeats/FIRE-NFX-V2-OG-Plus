@@ -1,0 +1,107 @@
+{
+    "PAD_PRESSED_COLOR": 10485760,
+    "ROOT_NOTE_COLOR": -1,
+    "DIM_DIM": 3,
+    "DIM_NORMAL": 2,
+    "DIM_BRIGHT": 0,
+    "DIM_DIV": 2.2,
+    "NOTE_NAMES": [
+        "C",
+        "C#",
+        "D",
+        "D#",
+        "E",
+        "F",
+        "F#",
+        "G",
+        "G#",
+        "A",
+        "A#",
+        "B"
+    ],
+    "ROOT_NOTE": "C",
+    "OCTAVE": 3,
+    "SCALE": 0,
+    "SHOW_ALL_MATCHING_CHORD_NOTES": false,
+    "SHOW_CHANNEL_WITH_SHARED_MIXER_CHANNELS": false,
+    "SHOW_PLAYBACK_NOTES": true,
+    "REOPEN_WINDOWS_AFTER_CLOSE_ALL": true,
+    "MARKER_PREFIX_TEXT": "{}-Marker",
+    "SHOW_PRN": false,
+    "ALT_DRUM_MODE_BANKS": true,
+    "DISPLAY_RECT_TIME_MS": 5000,
+    "UNDO_STYLE": 0,
+    "BROWSER_STEPS": 64,
+    "SHIFT_BROWSER_STEPS": 128,
+    "ALT_BROWSER_STEPS": 8,
+    "PATTERN_NAME": "{}-Pattern",
+    "PROMPT_NAME_FOR_NEW_PATTERN": false,
+    "TOGGLE_CR_AND_BROWSER": false,
+    "HIDE_BROWSER": true,
+    "AUTO_SWITCH_KNOBMODE": true,
+    "FORCE_UDLR_ON_BROWSER": true,
+    "MENU_DELAY": 0.025,
+    "AUTO_MAP_KNOWN_PARAMS_TO_USER_KNOBS": true,
+    "STARTUP_TEXT_TOP": "-={FIRE-NFX}=-",
+    "STARTUP_TEXT_BOT": "Version 2.0",
+    "STARTUP_FL_HINT": "^c FIRE-NFX-V2.x",
+    "DBL_TAP_DELAY_MS": 220,
+    "DBL_TAP_ZOOM": 4,
+    "GLOBAL_CONTROL_NAME": "GLOBAL CTRL",
+    "SHOW_PIANO_ROLL_MACROS": false,
+    "AUTO_SWITCH_TO_MAPPED_MIXER_EFFECTS": true,
+    "SHOW_CUSTOM_MACROS": false,
+    "WATCH_WINDOW_SWITCHING": true,
+    "DEFAULT_MACROS": [],
+    "CUSTOM_MACROS": [],
+    "Pallette": {
+        "Red": 10485760,
+        "Orange": 14712576,
+        "Yellow": 16776960,
+        "Lime": 11534080,
+        "Green": 65280,
+        "Teal": 65456,
+        "Cyan": 45311,
+        "Blue": 255,
+        "Purple": 3604627,
+        "Magenta": 16711935,
+        "White": 16777215,
+        "Black": 0
+    },
+    "SHOW_AUDIO_PEAKS": true,
+    "DETECT_AND_FIX_DEFAULT_PATTERNS": true,
+    "ACCENT_ENABLED": true,
+    "ACCENT_CURVE_SHAPE": 0.4,
+    "SHOW_CHANNEL_MUTES": true,
+    "AUTO_COLOR_ENABLED": true,
+    "AUTO_COLORS": {
+        "DRUMS": [
+            255,
+            65280
+        ],
+        "KEYS": [
+            14712576
+        ],
+        "BASS": [
+            3604627
+        ],
+        "808": [
+            11534080
+        ],
+        "GUITAR": [
+            10485760
+        ],
+        "PIANO": [
+            16776960
+        ],
+        "LEAD": [
+            16711935
+        ],
+        "VOX": [
+            45311
+        ]
+    },
+    "STARTINOG": false,
+    "MUTE_PLTRACK_IMMEDIATELY": true,
+    "DEV_MODE": -1
+}

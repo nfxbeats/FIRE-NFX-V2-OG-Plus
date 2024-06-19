@@ -105,18 +105,6 @@ class TFireNFX():
         self.RefreshShiftAltButtons()
         self.RefreshTransport()    
 
-        # line = '----------------------'
-        # DisplayText(Font6x8, JustifyCenter, 0, Settings.STARTUP_TEXT_TOP, True)
-        # DisplayText(Font6x16, JustifyCenter, 1, '+', True)
-        # # DisplayText(Font10x16, JustifyCenter, 2, Settings.STARTUP_TEXT_BOT, True)
-        # DisplayTextBottom('v' + VERSION)    
-
-        # #fun "animation"
-        # for i in range(16):
-        #     text = line[0:i]
-        #     DisplayText(Font6x16, JustifyCenter, 1, text, True)
-        #     time.sleep(.1)
-
         global shuttingDown
         shuttingDown = False
 
@@ -1276,6 +1264,15 @@ class TFireNFX():
             fx.Update()
             if( not fx.Used):
                 return True
+            
+            if (general.getVersion() >= 32):
+                # color picker mode
+                if(PadMode.NavSet.ColorPicker) and (self,padNum in stripA): 
+                    OrigColor = FLColorToPadColor( mixer.getSlotColor(trk, slotIdx), 1)
+                    mixer.setSlotColor(trk, slotIdx, NewColor)
+                    self.RefreshColorPicker()
+                    self.SetPadMode()
+                    return True                
 
             formidExpected = self.getFormIDFromTrackSlot(trk, slotIdx)
             formidActual = ui.getFocusedFormID()
@@ -2787,9 +2784,12 @@ class TFireNFX():
 
                 if(fx.Used):
                     if(currTrk == formTrack) and (slot == formSlot): # is it active?
-                        SetPadColor(aPads[fx.SlotIndex], cRed,dimBright)
+                        if (general.getVersion() >= 32):
+                            SetPadColor(aPads[fx.SlotIndex], fx.Color,dimBright)
+                        else:
+                            SetPadColor(aPads[fx.SlotIndex], cRed,dimBright)
                     else:
-                        SetPadColor(aPads[fx.SlotIndex], fx.Color,dimBright)
+                        SetPadColor(aPads[fx.SlotIndex], fx.Color,dimNormal)
                 else:
                     SetPadColor(aPads[fx.SlotIndex], fx.Color,dimDim)
 
@@ -4291,6 +4291,7 @@ class TFireNFX():
             if(name == 'INVALID'):
                 name = 'Slot'+str(fx+1)
             mxfx = TnfxMixerEffectSlot(fx, name, cWhite, trkNum)
+            mxfx.Update()
             res[fx] = mxfx
         return res        
 
@@ -4301,6 +4302,7 @@ class TFireNFX():
             name, uname = GetMixerSlotPluginNames(trkNum, fx)
             if(name != 'INVALID'):
                 mxfx = TnfxMixerEffectSlot(fx, name, cWhite, trkNum)
+                mxfx.Update()
                 res[fx] = mxfx 
         return res
 
@@ -5079,20 +5081,6 @@ class TFireNFX():
                     SetPadColorDirect(pad, RGBToColor(r,g,b), 0) 
             time.sleep(delay)
 
-    def GetColorFor(self,text):
-        if not Settings.AUTO_COLOR_ENABLED:
-            return None
-    
-        for autocolor in Settings.AUTO_COLORS.keys():
-            if autocolor.upper() in text.upper(): # 
-                colors = Settings.AUTO_COLORS[autocolor]
-                if len(colors) > 1:
-                    rndint = randominteger(len(colors)-1)
-                else:
-                    rndint = 0
-                return colors[rndint]
-
-        return None
 
     def adjustForAudioPeaks(self):
         return Settings.SHOW_AUDIO_PEAKS and transport.isPlaying()
