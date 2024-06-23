@@ -454,7 +454,7 @@ def GradientTest(stepsize = 8):
     Gradient(cCyan, cOff, stepsize, 56)
 
 
-def ShadeTest():
+def ShadeTestOld():
     Shades(cBlue,0)
     Shades(cPurple, 16)
     Shades(cMagenta, 32)
@@ -464,22 +464,46 @@ def ShadeTest():
     Shades(cGreen, 36)
     Shades(cCyan, 52)
 
+def ShadeTest():
+    Shades(cBlue,0)
+    Shades(cPurple, 16)
+    Shades(cMagenta, 32)
+    Shades(cRed, 48)
+    Shades(cOrange, 4)
+    Shades(cYellow, 20)
+    Shades(cGreen, 36)
+    Shades(cCyan, 52)
+    Shades(cLime, 8)
+    Shades(cTeal, 24)
+    Shades(cWhite, 40)
+    Shades(cBlack, 56)
 
-shDim = 0
-shDark = 1
-shNorm = 2
-shLight = 3
-def getShade(baseColor, shadeOffs):
-    multLighten = 1.33
-    multDarken = .23
+
+
+def getShadeOld(baseColor, shadeOffs):
+    multLighten = 1.4 # 1.33
+    multDarken = .33 #.23
+    baseColor, r, g, b = AdjustedFirePadColor(baseColor)
     if(shadeOffs == shDim):
-        return Shade(baseColor, multDarken, 2)    # dim
+        return ShadeOld(baseColor, multDarken, 2)    # dim
     elif(shadeOffs == shDark):
-        return Shade(baseColor, multDarken, 1)    # dark
+        return ShadeOld(baseColor, multDarken, 1)    # dark
     elif(shadeOffs == shNorm):
         return baseColor                           # norm
     elif(shadeOffs == shLight):
-        return Shade(baseColor, multLighten, 1)   # light
+        return ShadeOld(baseColor, multLighten, 1)   # light
+    else: 
+        return baseColor
+
+def getShade(baseColor, shadeOffs):
+    if(shadeOffs == shDim):
+        return Shade(baseColor, -0.98)     # dim
+    elif(shadeOffs == shDark):
+        return Shade(baseColor, -0.89)      # dark
+    elif(shadeOffs == shNorm):
+        return baseColor                    # norm
+    elif(shadeOffs == shLight):
+        return Shade(baseColor, 0.2)       # light
     else: 
         return baseColor
 
@@ -496,11 +520,18 @@ def Dims(color, padOffs=0):
     SetPadColor(3+padOffs, color, dimFull)
 
 
+def ShadesOld(color, padOffs=0):
+    SetPadColor(0+padOffs, getShadeOld(color, shDim), 0)
+    SetPadColor(1+padOffs, getShadeOld(color, shDark), 0)
+    SetPadColor(2+padOffs, getShadeOld(color, shNorm), 0)
+    SetPadColor(3+padOffs, getShadeOld(color, shLight), 0)
+
 def Shades(color, padOffs=0):
     SetPadColor(0+padOffs, getShade(color, shDim), 0)
     SetPadColor(1+padOffs, getShade(color, shDark), 0)
     SetPadColor(2+padOffs, getShade(color, shNorm), 0)
     SetPadColor(3+padOffs, getShade(color, shLight), 0)
+
 
 def Grads(color, stepsize = 64):
     Gradient(cOff, color, stepsize, 0, 32)
@@ -530,10 +561,11 @@ def getGradientOffs(baseColor, goVal):
 
 
 
+def Shade(color, factor):
+    return adjust_color_by_factor(color, factor)
 
 
-
-def Shade(color, mul = 1.1, offs = 0):
+def ShadeOld(color, mul = 1.1, offs = 0):
     color1 = color
     for i in range(3):
         if(i > 0):
@@ -541,6 +573,7 @@ def Shade(color, mul = 1.1, offs = 0):
             color1 = ColorMult2(color, mul)
         if(i == offs):
             return color1
+            
 
 def AnimOff(padIdx, color, steps = 16, wait = 0.1):
     OrigColor = ColorMap[padIdx].PadColor 
@@ -598,6 +631,45 @@ def ColorMult2(color, mul):
     b *= mul
     r2, g2, b2 = clamp_rgb(r, g, b)
     return RGBToColor(r2, g2, b2)
+
+def adjust_color_by_factor(hex_color, factor):
+    """
+    Adjusts the given hex color by the specified factor.
+    Lightens or darkens the color based on the factor.
+    
+    :param hex_color: Original color in hex format (e.g., 0x0000ff)
+    :param factor: A float where positive values lighten and negative values darken the color
+    :return: Adjusted color in hex format
+    """
+    # Ensure factor is within a reasonable range (-1 to 1)
+    factor = max(-1, min(1, factor))
+    
+    # Convert hex color to RGB
+    r = (hex_color >> 16) & 0xFF
+    g = (hex_color >> 8) & 0xFF
+    b = hex_color & 0xFF
+    
+    # Adjust the RGB values
+    if factor > 0:
+        # Lighten the color
+        r = r + (127 - r) * factor
+        g = g + (127 - g) * factor
+        b = b + (127 - b) * factor
+    else:
+        # Darken the color
+        factor = -factor
+        r = r * (1 - factor)
+        g = g * (1 - factor)
+        b = b * (1 - factor)
+    
+    # Ensure values are within 0-127 range
+    r = min(127, max(0, int(r)))
+    g = min(127, max(0, int(g)))
+    b = min(127, max(0, int(b)))
+    
+    # Convert back to hex
+    adjusted_hex_color = (r << 16) + (g << 8) + b
+    return adjusted_hex_color
 
 def clamp_rgb(r, g, b):
     # from https://stackoverflow.com/questions/141855/programmatically-lighten-a-color

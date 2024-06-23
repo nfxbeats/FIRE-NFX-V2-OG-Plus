@@ -5017,19 +5017,19 @@ class TFireNFX():
         return matched, msg, tempMsg, (msg in visited)
 
     def AdjustColorBrightness(self,color, brightlevel):
-        r, g, b = utils.ColorToRGB(color)
-        h, s, v = utils.RGBToHSV(r, g, b) # colorsys.rgb_tohsv(r, g, b)
+        r, g, b = nfxutils.ColorToRGB(color)
+        h, s, v = nfxutils.RGBToHSV(r, g, b) # colorsys.rgb_tohsv(r, g, b)
         newV = int(self.mapRange(round(brightlevel,1), 0.0, 1.0, 8, 127)) 
-        r, g, b = utils.HSVtoRGB(h, s, newV) # colorsys.hsv_torgb(h,s,newV)
-        color = utils.RGBToColor(int(r), int(g), int(b) ) 
+        r, g, b = nfxutils.HSVtoRGB(h, s, newV) # colorsys.hsv_torgb(h,s,newV)
+        color = nfxutils.RGBToColor(int(r), int(g), int(b) ) 
         return color 
 
     def SetPadColorPeakVal(self,pad = 0, color = cPurple, peakval = 1, flushBuffer= True):
-        r, g, b = utils.ColorToRGB(color)
-        h, s, v = utils.RGBToHSV(r, g, b) # colorsys.rgb_tohsv(r, g, b)
+        r, g, b = nfxutils.ColorToRGB(color)
+        h, s, v = nfxutils.RGBToHSV(r, g, b) # colorsys.rgb_tohsv(r, g, b)
         newV = int(self.mapRange(round(peakval,1), 0.0, 1.0, 8, 255)) 
-        r, g, b = utils.HSVtoRGB(h, s, newV) # colorsys.hsv_torgb(h,s,newV)
-        color = utils.RGBToColor(int(r), int(g), int(b) ) 
+        r, g, b = nfxutils.HSVtoRGB(h, s, newV) # colorsys.hsv_torgb(h,s,newV)
+        color = nfxutils.RGBToColor(int(r), int(g), int(b) ) 
         SetPadColorDirect(pad, color, 0)
         #if(flushBuffer):
         #    time.sleep(.1)

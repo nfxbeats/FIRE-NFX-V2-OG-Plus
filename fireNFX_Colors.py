@@ -10,12 +10,12 @@ cMuted      = cOff
 pallette1 = {   'Red': 0xA00000,
                 'Orange': 0xE07F00, #0xFF7F00, 
                 'Yellow': 0xFFFF00,
-                'Lime': 0xAFFF00,
+                'Lime': 0x55cd00, #0xAFFF00,
                 'Green': 0x00FF00,
-                'Teal': 0x00FFb0, 
-                'Cyan': 0x00B0FF,
+                'Teal': 0x00FF60, #0x00FFb0
+                'Cyan': 0x0060FF,  # 0x00B0FF,
                 'Blue': 0x0000FF,
-                'Purple': 0x370093,
+                'Purple': 0x1f00ff,  #0x370093,
                 'Magenta': 0xFF00FF,
                 'White': 0xFFFFFF,
                 'Black': 0x000000
@@ -79,3 +79,9 @@ def SetPallette(p):
     cPurple     = p["Purple"]
     cMagenta    = p["Magenta"]
 
+shDim = 0
+shDark = 1
+shNorm = 2
+shLight = 3
+
+dimShades = [shNorm, shDark, shDim, shDim, shDim]

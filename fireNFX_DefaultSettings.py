@@ -29,8 +29,8 @@ class TnfxDefaultSettings:
 
         # this is an interal way to control the brightness for things like vs non active pads
         # value can be 0-5 where 0 is NO DIMMING and 5 is MAX DIMMING
-        self.DIM_DIM = 3
-        self.DIM_NORMAL = 2
+        self.DIM_DIM = 2
+        self.DIM_NORMAL = 1
         self.DIM_BRIGHT = 0
         
         # how wide is the dim spread
@@ -177,3 +177,8 @@ if not persist.load_object(Settings, 'Settings.json'):
         print('User settings NOT found. Using defaults.')# Failed to import - assume they don't have custom settings
 else:
     print('Settings.json found and loaded.')
+
+# no longer user changeable
+Settings.DIM_DIM = 2
+Settings.DIM_NORMAL = 1
+Settings.DIM_BRIGHT = 0    

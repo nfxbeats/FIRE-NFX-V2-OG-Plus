@@ -1,11 +1,15 @@
 # Fire device specific functions.
 
+import colorsys
 import device 
 import midi
 import utils 
+import math 
+import time
+import fireNFX_Utils as nfxutils
+import fireNFX_Colors as colors
 
-
-# define and initialize A COLORMAP
+# Class representing a color map for a pad, including its index, color, and dimming factor
 class TnfxColorMap:
     def __init__(self, padIndex, color, dimFactor):
         self.PadIndex = padIndex
@@ -15,44 +19,40 @@ class TnfxColorMap:
         self.G = 0
         self.B = 0
 
-ColorMap = []
+# Initialize color map with 64 pads
+ColorMap = [TnfxColorMap(p, 0, 0) for p in range(64)]
 
-# init the color map
-for p in range(64):
-    ColorMap.append(TnfxColorMap(p, 0, 0))
-
+# Retrieve the current color of a specific pad by its index
 def getPadColor(padIdx):
     return ColorMap[padIdx].PadColor
 
-
-def SetPadColorBuffer(idx, col, dimFactor, flushBuffer = False, bSave = True):
-    global ColorMap
-    if(col == -1):
+# Set the color of a pad in the buffer, with optional dimming and saving to the color map
+def SetPadColorBuffer(idx, col, dimFactor, flushBuffer=False, bSave=True):
+    if col == -1:
         col = ColorMap[idx].PadColor
+        dimFactor = ColorMap[idx].DimFactor
 
-    # r = (col & 0x7F0000) >> 16
-    # g = (col & 0x007F00) >> 8
-    # b = (col & 0x7F)
+    col = nfxutils.getShade(col, colors.dimShades[dimFactor])
 
     newCol, r, g, b = AdjustedFirePadColor(FLColorToPadColor(col))
 
-    # reduce brightness by half time dimFactor
-    if(dimFactor > 0):
-        for i in range(dimFactor):
-            r = r >> 1
-            g = g >> 1
-            b = b >> 1
+    # if dimFactor > 0:
+    #     for _ in range(dimFactor):
+    #         r >>= 1
+    #         g >>= 1
+    #         b >>= 1
 
-    if(bSave):
+    if bSave:
         ColorMap[idx].PadColor = newCol 
         ColorMap[idx].DimFactor = dimFactor
         ColorMap[idx].R = r
         ColorMap[idx].G = g
         ColorMap[idx].B = b
     
-    if(flushBuffer):
+    if flushBuffer:
         FlushColorMap()
 
+# Send the current color map to the device, updating all pad colors
 def FlushColorMap():
     MsgIDSetRGBPadLedState = 0x65
     dataOut = bytearray(4 * 64)
@@ -65,77 +65,95 @@ def FlushColorMap():
         bufOffs += 4
     SendMessageToDevice(MsgIDSetRGBPadLedState, len(dataOut), dataOut)
 
+# Retrieve the entire color map
 def getColorMap():
     return ColorMap
 
-def SetPadColor(idx, col, dimFactor, bSaveColor = True, bUseBuffer = False, dimMult = 2.5):
-    global ColorMap
-    if(bUseBuffer):
+# Set the color of a pad, either directly or using the buffer
+def SetPadColor(idx, col, dimFactor, bSaveColor=True, bUseBuffer=False, dimMult=2.5):
+    if bUseBuffer:
         SetPadColorBuffer(idx, col, dimFactor, False)
     else:
         SetPadColorDirect(idx, col, dimFactor, bSaveColor, dimMult)
 
+def scaleColorForFire(color, maxValue=127):
+    """
+    Scales RGB values to ensure the maximum value does not exceed 127.
+    
+    """
+    r, g, b = nfxutils.ColorToRGB(color)
+    max_rgb = max(r, g, b)
+    
+    if max_rgb > maxValue:
+        scale_factor = maxValue / max_rgb
+        r = int(r * scale_factor)
+        g = int(g * scale_factor)
+        b = int(b * scale_factor)
+    
+    return nfxutils.RGBToColor(r, g, b), r, g, b
+
+def scaleColor(color, maxValue=127):
+    color, r, g, b = scaleColorForFire(color, maxValue)
+    return color
+
+def scaleRGB(r, g, b, maxValue=127):
+    color = nfxutils.RGBToColor(r, g, b)
+    newcolor, r, g, b = scaleColorForFire(color, maxValue)
+    return r, g, b
+
+# Adjust the color for the pad, ensuring it fits within the desired range and constraints
 def AdjustedFirePadColor(color):
-    r, g, b = utils.ColorToRGB(color)
-    reduceRed = 1
-    reduceBlue = 1
-    if(b > r) :
-        reduceRed  = r / b
-    if(g > b):
-        reduceBlue = b / g
-    if(g > r) and (reduceRed == 1):
-        reduceRed  = r / g
-    if reduceRed < 1:
-        r = int(r * reduceRed)  # red adjust
-    if(reduceBlue < 1):
-        b = int(b * reduceBlue)  # blue adjust
-    # reduce by half to support 0..127 range
-    r = r//2
-    g = g//2
-    b = b//2
-    return utils.RGBToColor(r, g, b), r, g, b    
+    return scaleColorForFire(color)
+    # r, g, b = utils.ColorToRGB(color)    
+    # reduceRed = min(1, r / max(b, 1))
+    # reduceBlue = min(1, b / max(g, 1))
+    # reduceRed = min(reduceRed, r / max(g, 1))
+    # r = int(r * reduceRed) if reduceRed < 1 else r
+    # b = int(b * reduceBlue) if reduceBlue < 1 else b
+    # r //= 2
+    # g //= 2
+    # b //= 2
+    # return utils.RGBToColor(r, g, b), r, g, b
 
-def SetPadColorDirect(idx, col, dimFactor, bSaveColor = True, dimMult = 2.5):
-    # if col is -1, it will remember the previously saved color for that idx.
-    global ColorMap
-
-    if(idx < 0) or (idx > 63):
+# Set the color of a pad directly, with optional dimming and saving to the color map
+def SetPadColorDirect(idx, col, dimFactor, bSaveColor=True, dimMult=2.5):
+    if idx < 0 or idx > 63:
         return
 
-    if(col == -1): # reads the stored color
+    if col == -1:
         col = ColorMap[idx].PadColor
         dimFactor = ColorMap[idx].DimFactor
 
-    col = FLColorToPadColor(col, 1)
+    col = nfxutils.getShade(col, colors.dimShades[dimFactor])
 
-    if(bSaveColor):
+    # col = FLColorToPadColor(col, 1)
+
+    if bSaveColor:
         ColorMap[idx].PadColor = col 
         ColorMap[idx].DimFactor = dimFactor
     
     newCol, r, g, b = AdjustedFirePadColor(col)
 
-    # reduce brightness by half times dimFactor
-    if(dimFactor > 0):
-        for i in range(dimFactor):
-            r = int(r / dimMult)
-            g = int(g / dimMult)
-            b = int(b / dimMult)
+    # if dimFactor > 0:
+    #     for _ in range(dimFactor):
+    #         r = int(r / dimMult)
+    #         g = int(g / dimMult)
+    #         b = int(b / dimMult)
 
     SetPadRGB(idx, r, g, b)
 
-
-def SetPadRGB(idx, r, g, b):  
+# Set the RGB color of a specific pad by sending a MIDI message
+def SetPadRGB(idx, r, g, b):
     MsgIDSetRGBPadLedState = 0x65
-    #print('Actual RGB To Pad', hex(r), hex(g), hex(b) )
     dataOut = bytearray(4)
-    i = 0
-    dataOut[i] = idx
-    dataOut[i + 1] = r
-    dataOut[i + 2] = g
-    dataOut[i + 3] = b
+    dataOut[0] = idx
+    dataOut[1] = r
+    dataOut[2] = g
+    dataOut[3] = b
     SendMessageToDevice(MsgIDSetRGBPadLedState, len(dataOut), dataOut)
 
-def SendMessageToDevice(ID, l, data): # Fire specific
+# Send a SysEx message to the MIDI device
+def SendMessageToDevice(ID, dataLength, data):
     ManufacturerIDConst = 0x47
     DeviceIDBroadCastConst = 0x7F
     ProductIDConst = 0x43
@@ -143,9 +161,9 @@ def SendMessageToDevice(ID, l, data): # Fire specific
     if not device.isAssigned():
         return
     
-    msg = bytearray(7 + l + 1)
-    lsb = l & 0x7F
-    msb = (l & (~ 0x7F)) >> 7
+    msg = bytearray(7 + dataLength + 1)
+    lsb = dataLength & 0x7F
+    msb = (dataLength & (~0x7F)) >> 7
 
     msg[0] = midi.MIDI_BEGINSYSEX
     msg[1] = ManufacturerIDConst
@@ -154,56 +172,54 @@ def SendMessageToDevice(ID, l, data): # Fire specific
     msg[4] = ID
     msg[5] = msb
     msg[6] = lsb
-    if (l > 63):
-        for n in range(0, len(data)):
-            msg[7 + n] = data[n]
-    else:
-        for n in range(0, l):
-            msg[7 + n] = data[n]
-    msg[len(msg) - 1] = midi.MIDI_ENDSYSEX
+    msg[7:7+dataLength] = data[:dataLength]
+    msg[7+dataLength] = midi.MIDI_ENDSYSEX
     device.midiOutSysex(bytes(msg))
 
-import colorsys 
-_FixChannelColors = True 
+_FixChannelColors = True
 
-def FLColorToPadColor(FLColor, div = 2):
-    
-    padcolor = FLColor & 0xFFFFFF # take out any alpha channel
-    # if(padcolor > 0x7F7F7F):
-    #     div = 2
-
+# Convert an FL color to a pad-compatible color, with optional division for brightness adjustment
+def FLColorToPadColor(FLColor, div=2):
+    if FLColor == None:
+        return 0
+    padcolor = FLColor & 0xFFFFFF
     r = (padcolor >> 16) & 0xFF
-    g = (padcolor >> 8)  & 0xFF
-    b = (padcolor) & 0xFF
+    g = (padcolor >> 8) & 0xFF
+    b = padcolor & 0xFF
 
-    #print('------\nFLColor', hex(FLColor), '->', hex(utils.RGBToColor(r, g, b)), ' to padcolor', hex(padcolor), '\nrgb', hex(r),hex(g),hex(b) )
+    if _FixChannelColors:
+        r, g, b = [0 if x == 20 else x for x in (r, g, b)]
 
-    # test this fix for channel colors
-    if(_FixChannelColors):
-        if (r == 20):
-            r = 0
-        if (g == 20):
-            g = 0
-        if (b == 20):
-            b = 0
-        # if (r == 0x80):
-        #     r = 0x7f
-        # if (g == 0x80):
-        #     g = 0x7f
-        # if (b == 0x80):
-        #     b = 0x7f
+    return nfxutils.RGBToColor(r, g, b)
 
-        # r = r // div
-        # g = g // div
-        # b = b // div
+# Transition the color of a pad from a start color to an end color over a specified duration
+def TransitionPadColor(idx, start_col, end_col, duration=1.0, steps=10):
+    start_r, start_g, start_b = nfxutils.ColorToRGB(start_col)
+    end_r, end_g, end_b = nfxutils.ColorToRGB(end_col)
 
-        #print('adjusted color', hex(r),hex(g),hex(b) )
+    delta_r = (end_r - start_r) / steps
+    delta_g = (end_g - start_g) / steps
+    delta_b = (end_b - start_b) / steps
 
-    # h,l,s = colorsys.rgb_to_hls(r, g, b)
-    # print('hls', h,l,s)
-    # l = 127.5
-    # s = -1.007905138339921
-    # r1, g1, b1 = colorsys.hls_to_rgb(h, l, s)
-    # print('newrgb', r1, g1, b1 )
+    for step in range(steps + 1):
+        r = int(start_r + delta_r * step)
+        g = int(start_g + delta_g * step)
+        b = int(start_b + delta_b * step)
+        col = nfxutils.RGBToColor(r, g, b)
+        SetPadColor(idx, col, 0)
+        time.sleep(duration / steps)
 
-    return utils.RGBToColor(r, g, b)
+
+def TestColorMap():
+    for i in range(64):
+        flushNow = False # (i == 63)
+        SetPadColorBuffer(i, colors.cRed, 0, flushNow, True)
+        FlushColorMap()
+    time.sleep(5.0)
+    for i in range(64):
+        flushNow = (i == 63)
+        SetPadColorBuffer(i, colors.cGreen, 0, flushNow, True)
+    time.sleep(5.0)
+    for i in range(64):
+        flushNow = (i == 63)
+        SetPadColorBuffer(i, colors.cBlue, 0, flushNow, True)
