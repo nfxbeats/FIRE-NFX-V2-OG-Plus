@@ -796,11 +796,13 @@ class TFireNFX():
             event.handled = True 
 
     def OnNoteOn(self,event):
-        #self.prnt('OnNoteOn()', utils.GetNoteName(event.data1),event.data1,event.data2)
+        # self.prnt('OnNoteOn()', utils.GetNoteName(event.data1),event.data1,event.data2)
+        self.ShowNote(event.data1, True)
         pass
 
     def OnNoteOff(self,event):
-        #self.prnt('OnNoteOff()', utils.GetNoteName(event.data1),event.data1,event.data2)
+        # self.prnt('OnNoteOff()', utils.GetNoteName(event.data1),event.data1,event.data2)
+        self.ShowNote(event.data1, False)
         pass
 
     def OnSysEx(self, event):
@@ -1178,14 +1180,18 @@ class TFireNFX():
 
         event.data1 = PadMap[padNum].NoteInfo.MIDINote
         event.data2 = self.translateVelocity(event.data2)
+        noteOn = (event.data2 > 0)
 
         if(ShowChords) and (GetScaleNoteCount(ScaleIdx) == 7):
             if (padNum in pdChordBar):
                 chordNum = pdChordBar.index(padNum)+1
-                noteOn = (event.data2 > 0)
                 noteVelocity = event.data2
                 chan = getCurrChanIdx() # channels.channelNumber()
                 self.HandleChord(chan, chordNum, noteOn, noteVelocity, Chord7th, ChordInvert)
+                if(noteOn):
+                    SetPadColor(padNum, cBlue, dimBright)
+                else:
+                    SetPadColor(padNum, cBlue, dimNormal)
                 return True
             elif(padNum in pdChordFuncs) and (event.data2 > 0):
                 chordType = '' # normal
@@ -1205,6 +1211,12 @@ class TFireNFX():
                 self.RefreshNotes()
                 DisplayTimedText(chordType)
                 return True 
+            
+
+        # if(event.data2 < 32): # min velocity is 32, so anything below that s/b note off
+        #     self.RefreshNotes()
+        # else:
+        #     SetPadColor(padNum, cWhite, dimBright)
 
         return False # to continue processing regular notes
 
@@ -1371,7 +1383,8 @@ class TFireNFX():
         # color picker mode
         if(PadMode.NavSet.ColorPicker) and (self,padNum in patternStripA): 
             OrigColor = FLColorToPadColor( patterns.getPatternColor(patterns.patternNumber()), 1)
-            patterns.setPatternColor(patterns.patternNumber(), NewColor)
+            patterns.setPatternColor(patterns.patternNumber(), PadColorToFLColor(NewColor) )
+            # patterns.setPatternColor(patterns.patternNumber(), NewColor )
             self.UpdatePatternModeData()                
             self.RefreshPatternStrip()
             self.RefreshColorPicker()
@@ -1472,6 +1485,8 @@ class TFireNFX():
 
     def HandleKnob(self,event, ctrlID, useparam = None, displayUpdateOnly = False):
         global lastKnobCtrlID
+        global NewColor
+
         steps =  Settings.BROWSER_STEPS  # default
 
         if(event.isIncrement != 1):
@@ -1485,6 +1500,34 @@ class TFireNFX():
 
         if displayUpdateOnly:
             value = 0
+
+        if(PadMode.NavSet.ColorPicker) and (ctrlID in [ IDKnob1, IDKnob2, IDKnob3]):
+            r, g, b = utils.ColorToRGB(NewColor)
+            # print('color picker mode', value, hex(NewColor), r, g, b)
+            Name = 'Color'
+
+            if ctrlID == IDKnob1:
+                r += value
+                r = max(0, min(r, 127))
+                Name = 'Color (R)'
+                
+            elif ctrlID == IDKnob2:
+                g += value
+                g = max(0, min(g, 127))
+                Name = 'Color (G)'
+                
+            elif ctrlID == IDKnob3:
+                b += value 
+                b = max(0, min(b, 127))
+                Name = 'Color (B)'
+            
+            NewColor = utils.RGBToColor(r, g, b)
+            valstr = f'#{NewColor:06x}'.upper()
+            DisplayBar2(Name, value, valstr, False)
+
+            self.RefreshColorPicker()
+
+            return True
 
         chanNum = getCurrChanIdx() #  channels.channelNumber()
         recEventID = channels.getRecEventId(chanNum)
@@ -1544,7 +1587,7 @@ class TFireNFX():
 
                 else:
                     return True 
-        elif KnobMode == KM_USER0 and self.isMixerMode(self): # KM_MIXER :
+        elif KnobMode == KM_USER0 and self.isMixerMode(): # KM_MIXER :
             mixerNum = mixer.trackNumber()
             mixerName = mixer.getTrackName(mixerNum) 
             recEventID = mixer.getTrackPluginId(mixerNum, 0)
@@ -1598,6 +1641,14 @@ class TFireNFX():
                 event.handled = True
             return True # these knobs will be handled in OnMidiMsg prior to this.
 
+    def HandleKnobForColor(self, value, Name):
+        global NewColor
+        valstr = "{}".format(hex(NewColor))
+        DisplayBar2(Name, value, valstr, False)
+
+        
+        return True
+    
     def HandleKnobReal(self,recEventIDIndex, value, Name, Bipolar, stepsInclZero = 0):
         knobres = 1/64
         if(stepsInclZero > 0):
@@ -2108,6 +2159,8 @@ class TFireNFX():
             self.PlayMIDINote(chan, note, noteVelocity)
             self.PlayMIDINote(chan, note3, noteVelocity)
             self.PlayMIDINote(chan, note5, noteVelocity)
+        
+        
 
     def HandleColorPicker(self,padNum):
         '''
@@ -2512,6 +2565,7 @@ class TFireNFX():
     def RefreshNotes(self):
         global PadMap
         global NoteMap
+        global NoteColorMap 
 
         self.RefreshPageLights()
 
@@ -2550,15 +2604,17 @@ class TFireNFX():
             if(ShowChords) and (GetScaleNoteCount(ScaleIdx) == 7):
                 if(p in pdChordBar):
                     SetPadColor(p, cBlue,dimNormal)
-                elif(p in pdChordFuncs):
-                    SetPadColor(p, cOff,dimNormal)
+                # elif(p in pdChordFuncs):
+                #     SetPadColor(p, cOff,dimNormal)
                 else:
                     SetPadColor(p, color,dimNormal)
                 self.RefreshChordType()
             else:
                 SetPadColor(p, color,dimNormal)
-                    
 
+            NoteColorMap[p].PadColor = color
+
+    def RefreshMode(self):
         # set the specific mode related funcs here
 
         # RefreshMacros() 
@@ -3160,7 +3216,7 @@ class TFireNFX():
 
         for idx, pad in enumerate(pdPallette):
             if (pad != pdOrigColor):
-                SetPadColor(pad, FLColorToPadColor(pl[idx],1),dimNormal)
+                SetPadColor(pad, FLColorToPadColor(pl[idx],1),dimBright)
         
         SetPadColor(pdOrigColor, OrigColor,dimNormal)
 
@@ -3770,12 +3826,16 @@ class TFireNFX():
 
     def PlayMIDINote(self,chan, note, velocity):   
         if(chan > -1):
-            if(velocity > 0):
-                channels.midiNoteOn(chan, note, velocity)
-                self.ShowNote(note, True)
-            else:
-                channels.midiNoteOn(chan, note, 0)
-                self.ShowNote(note, False)
+            isOn = velocity > 0
+            channels.midiNoteOn(chan, note, velocity)
+            self.ShowNote(note, isOn)
+
+            # if(velocity > 0):
+            #     channels.midiNoteOn(chan, note, velocity)
+            #     self.ShowNote(note, True)
+            # else:
+            #     channels.midiNoteOn(chan, note, 0)
+            #     self.ShowNote(note, False)
 
     def RunMacro(self,macro):
         if(macro == None):
@@ -4857,6 +4917,7 @@ class TFireNFX():
             return
 
         dim =dimNormal
+        
         if(isOn):
             dim =dimBright
         
@@ -4865,7 +4926,8 @@ class TFireNFX():
         if(note in noteDict):
             pads = noteDict[note]
             for pad in pads:
-                SetPadColor(pad,  getPadColor(pad), dim)
+                SetPadColor(pad,  getNotePadColor(pad), dim, False)
+
     
     def DrumPads(self):
         id, pl = self.getCurrChanPlugin()
@@ -5018,17 +5080,17 @@ class TFireNFX():
 
     def AdjustColorBrightness(self,color, brightlevel):
         r, g, b = nfxutils.ColorToRGB(color)
-        h, s, v = nfxutils.RGBToHSV(r, g, b) # colorsys.rgb_tohsv(r, g, b)
+        h, s, v = utils.RGBToHSV(r, g, b) # colorsys.rgb_tohsv(r, g, b)
         newV = int(self.mapRange(round(brightlevel,1), 0.0, 1.0, 8, 127)) 
-        r, g, b = nfxutils.HSVtoRGB(h, s, newV) # colorsys.hsv_torgb(h,s,newV)
+        r, g, b = utils.HSVtoRGB(h, s, newV) # colorsys.hsv_torgb(h,s,newV)
         color = nfxutils.RGBToColor(int(r), int(g), int(b) ) 
         return color 
 
     def SetPadColorPeakVal(self,pad = 0, color = cPurple, peakval = 1, flushBuffer= True):
         r, g, b = nfxutils.ColorToRGB(color)
-        h, s, v = nfxutils.RGBToHSV(r, g, b) # colorsys.rgb_tohsv(r, g, b)
+        h, s, v = utils.RGBToHSV(r, g, b) # colorsys.rgb_tohsv(r, g, b)
         newV = int(self.mapRange(round(peakval,1), 0.0, 1.0, 8, 255)) 
-        r, g, b = nfxutils.HSVtoRGB(h, s, newV) # colorsys.hsv_torgb(h,s,newV)
+        r, g, b = utils.HSVtoRGB(h, s, newV) # colorsys.hsv_torgb(h,s,newV)
         color = nfxutils.RGBToColor(int(r), int(g), int(b) ) 
         SetPadColorDirect(pad, color, 0)
         #if(flushBuffer):

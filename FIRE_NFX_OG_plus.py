@@ -189,7 +189,7 @@ class TFire():
         self.CurrentKnobsMode = KnobsModeChannelRack
         self.CurrentNoteMode =NoteModeDualKeyb
         self.OldNoteMode = -1
-        self.CurrentDrumMode = DrumModeFPC
+        self.CurrentDrumMode = DrumModeFPC #DrumModeFPCCenter
         self.TopText = 'FL Studio'
         self.DisplayedText = ''
         self.ShiftHeld = False

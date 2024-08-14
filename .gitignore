@@ -180,3 +180,6 @@ utils.py
 Channel Functions.md
 Mixer Functions.md
 fireNFX_FireUtils_orig.py
+hackfuncs.py
+nftest.py
+testgui.exe

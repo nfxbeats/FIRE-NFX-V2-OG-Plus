@@ -21,10 +21,15 @@ class TnfxColorMap:
 
 # Initialize color map with 64 pads
 ColorMap = [TnfxColorMap(p, 0, 0) for p in range(64)]
+NoteColorMap = [TnfxColorMap(p, 0, 0) for p in range(64)]
 
 # Retrieve the current color of a specific pad by its index
 def getPadColor(padIdx):
     return ColorMap[padIdx].PadColor
+
+def getNotePadColor(padIdx):
+    return  NoteColorMap[padIdx].PadColor
+
 
 # Set the color of a pad in the buffer, with optional dimming and saving to the color map
 def SetPadColorBuffer(idx, col, dimFactor, flushBuffer=False, bSave=True):
@@ -85,7 +90,8 @@ def scaleColorForFire(color, maxValue=127):
     max_rgb = max(r, g, b)
     
     if max_rgb > maxValue:
-        scale_factor = maxValue / max_rgb
+        # scale_factor = maxValue / max_rgb
+        scale_factor = 127 / 255
         r = int(r * scale_factor)
         g = int(g * scale_factor)
         b = int(b * scale_factor)
@@ -178,19 +184,34 @@ def SendMessageToDevice(ID, dataLength, data):
 
 _FixChannelColors = True
 
+def PadColorToFLColor(padcolor):
+    r, g, b, a = nfxutils.ColorToRGBA(padcolor)
+    scaleby = 255/127 
+    r = min(255, int(r * scaleby))
+    g = min(255, int(g * scaleby))
+    b = min(255, int(b * scaleby))
+    a = min(255, a)
+    return nfxutils.RGBAToColor(r, g, b, a)
+
+
 # Convert an FL color to a pad-compatible color, with optional division for brightness adjustment
 def FLColorToPadColor(FLColor, div=2):
+
     if FLColor == None:
         return 0
-    padcolor = FLColor & 0xFFFFFF
-    r = (padcolor >> 16) & 0xFF
-    g = (padcolor >> 8) & 0xFF
-    b = padcolor & 0xFF
 
-    if _FixChannelColors:
-        r, g, b = [0 if x == 20 else x for x in (r, g, b)]
+    color, r, g, b = scaleColorForFire(FLColor)
+    return color 
 
-    return nfxutils.RGBToColor(r, g, b)
+    # padcolor = FLColor & 0xFFFFFF
+    # r = (padcolor >> 16) & 0xFF
+    # g = (padcolor >> 8) & 0xFF
+    # b = padcolor & 0xFF
+
+    # # if _FixChannelColors:
+    # #     r, g, b = [0 if x == 20 else x for x in (r, g, b)]
+
+    # return nfxutils.RGBToColor(r, g, b)
 
 # Transition the color of a pad from a start color to an end color over a specified duration
 def TransitionPadColor(idx, start_col, end_col, duration=1.0, steps=10):
@@ -223,3 +244,5 @@ def TestColorMap():
     for i in range(64):
         flushNow = (i == 63)
         SetPadColorBuffer(i, colors.cBlue, 0, flushNow, True)
+
+

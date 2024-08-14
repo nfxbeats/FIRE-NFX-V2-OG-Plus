@@ -7,15 +7,15 @@ cNotMuted   = cDimWhite
 cMuted      = cOff
 
 
-pallette1 = {   'Red': 0xA00000,
-                'Orange': 0xE07F00, #0xFF7F00, 
-                'Yellow': 0xFFFF00,
-                'Lime': 0x55cd00, #0xAFFF00,
-                'Green': 0x00FF00,
-                'Teal': 0x00FF60, #0x00FFb0
+pallette1 = {   'Red': 0x7F0000,
+                'Orange': 0x7F3800, #0xFF7F00, 
+                'Yellow': 0x7F7F00,
+                'Lime': 0x2d7f00, #0x55cd00, #0xAFFF00,
+                'Green': 0x004F00,
+                'Teal': 0x00683b, #0x00FFb0
                 'Cyan': 0x0060FF,  # 0x00B0FF,
                 'Blue': 0x0000FF,
-                'Purple': 0x1f00ff,  #0x370093,
+                'Purple': 0x300477, # 0x1f00ff,  #0x370093,
                 'Magenta': 0xFF00FF,
                 'White': 0xFFFFFF,
                 'Black': 0x000000

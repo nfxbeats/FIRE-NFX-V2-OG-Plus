@@ -435,6 +435,12 @@ def FLVersionAtLeast(version: str) -> bool:
     return getVersionTuple(getVersionStr()) >= getVersionTuple(version)
 
 # color funcs
+def ColorToRGBA(Color):
+    return (Color >> 16) & 0xFF, (Color >> 8) & 0xFF, Color & 0xFF, (Color >> 24) & 0xFF
+
+def RGBAToColor(R,G,B,A = 0xFF):
+    return (A << 24) | (R << 16) | (G << 8) | B
+
 def ColorToRGB(Color):
     return (Color >> 16) & 0xFF, (Color >> 8) & 0xFF, Color & 0xFF
 
