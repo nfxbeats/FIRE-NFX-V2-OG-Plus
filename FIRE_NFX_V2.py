@@ -673,7 +673,7 @@ class TFireNFX():
                     Name = device.getLinkedParamName(recEventIDIndex)
                     currVal = device.getLinkedValue(recEventIDIndex)
                     valstr = device.getLinkedValueString(recEventIDIndex)
-                    Bipolar = device.getLinkedInfo(recEventIDIndex) == EventCentered
+                    Bipolar = device.getLinkedInfo(recEventIDIndex) == Event_Centered
                     DisplayBar2(Name, currVal, valstr, Bipolar)
 
         
@@ -2800,14 +2800,78 @@ class TFireNFX():
         global UserModeLEDValues
         global UserKnobModeIndex
 
-        value = UserModeLEDValues[UserKnobModeIndex] 
+        mode = ''
+        value = UserModeLEDValues[UserKnobModeIndex]
+        usermode = UserModeLEDValues.index(value)  
         
         if(self.isMixerMode()):
             value += 2
+            mode = 'Mixer'
         elif(self.isChannelMode()):
             value += 1
+            mode = 'Channel'
+        
+        if usermode > 0:
+            mode +=  '(USER ' + str(usermode) + ')'
         
         SendCC(IDKnobModeLEDArray, value | 16)
+
+        fireNFX_Bridge.WriteINI('Knobs', 'Mode', mode)
+
+        self.UpdateBridgeKnobs()
+
+
+    def UpdateBridgeKnobs(self):
+        knobs  = ['', '', '', '']
+        knobsa = ['', '', '', '']
+        knobsb = ['', '', '', '']
+        modetext = ''
+        modealt = ''
+
+        if(PadMode.NavSet.ColorPicker):
+            knobs  = ['Red', 'Green', 'Blue', '']
+
+        if KnobMode == KM_USER0:
+                
+            if self.isChannelMode():
+                chanNum = channels.selectedChannel()
+                chanName = channels.getChannelName(chanNum)
+                modetext = str(chanNum) + ' - ' + chanName 
+                knobs = ['Volume', 'Pan', 'Filter', 'Filter Res']
+                if self.isFPCActive():
+                    fireNFX_Bridge.WriteINI('Knobs', 'ModeAlt', 'Held Pad')
+                    knobsa = ['Pad Vol', 'Pad Pan', 'Pad Tune', '']
+                    modealt = 'FPC Hold Pad'
+            elif self.isMixerMode():
+                mixerNum = mixer.trackNumber()
+                mixerName = mixer.getTrackName(mixerNum) 
+                modetext = str(mixerNum) + ' - ' + mixerName
+                modealt = 'SHIFT'
+                knobs = ['Volume', 'Pan', 'Filter', 'Filter Res']
+                knobs  = ['Volume', 'Pan', 'EQ Lo Gain', 'EQ Mid Gain']
+                knobsa = ['', 'Stereo Sep', 'EQ Lo Freq', 'EQ Mid Freq']
+        else:
+            
+            modetext = 'X: '
+
+            for idx, knobID in enumerate(KnobCtrls):
+                knobRecID = knobID + ( (KnobMode-KM_USER1) * 4 )
+                paramName = ''
+                if (general.getVersion() > 9):
+                    BaseID = EncodeRemoteControlID(device.getPortNumber(), 0, 0)
+                    recEventIDIndex = device.findEventID(BaseID + knobRecID, 0)
+                    if recEventIDIndex != 2147483647:
+                        # show the name/value on the display
+                        paramName = device.getLinkedParamName(recEventIDIndex)
+                knobs[idx] = paramName
+        
+        fireNFX_Bridge.WriteINI('Knobs', 'ModeText', modetext)
+        fireNFX_Bridge.WriteINI('Knobs', 'ModeAlt', modealt)
+        for i in range(4):
+            fireNFX_Bridge.WriteINI('Knobs', 'knob' + str(i + 1), knobs[i])
+            fireNFX_Bridge.WriteINI('Knobs', 'knob' + str(i + 1) + 'a', knobsa[i])
+            fireNFX_Bridge.WriteINI('Knobs', 'knob' + str(i + 1) + 'b', knobsb[i])
+
 
     def RefreshPlaylist(self):
         global PadMap
@@ -3681,6 +3745,7 @@ class TFireNFX():
             ChannelMap.append(chnl)
             if(chnl.Selected):
                 ChannelSelectedMap.append(chnl)
+                self.UpdateBridgeKnobs() 
 
     def UpdatePatternModeData(self):
         self.ResetPadMaps(False)
@@ -4227,6 +4292,8 @@ class TFireNFX():
                 self.RefreshPerformanceMode(-1)        
         self.RefreshPadModeButtons() # lights the button
         self.RefreshAll()
+
+        # fireNFX_Bridge.WriteINI('General', 'Mode', PadMode.Mode)
 
     def getCurrChanPluginID(self):
         name, plugin = self.getCurrChanPlugin()
