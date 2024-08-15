@@ -703,8 +703,8 @@ class TFireNFX():
 
             #PROGRESS BAR
             if(SHOW_PROGRESS):
-                progPads = self.getProgressPads()
-                if(PadMode.Mode == MODE_PATTERNS) and (self.isPlaylistMode(self)):
+                if(PadMode.Mode == MODE_PATTERNS) and (self.isPlaylistMode()):
+                    progPads = self.getProgressPads()
                     if(padNum in progPads) and (pMap.Pressed == 1): # only handle on pressed.
                         event.handled = self.HandleProgressBar(padNum)
                         return event.handled
@@ -757,16 +757,22 @@ class TFireNFX():
 
             if(not self.isNoNav()):
                 # always handle macros
-                if(padNum in pdMacros) and (pMap.Pressed): 
-                    event.handled = self.HandleMacros(pdMacros.index(padNum))
-                    self.RefreshMacros()
-                    self.UpdateAndRefreshWindowStates()
+                if(padNum in pdMacros):
+                    if (pMap.Pressed): 
+                        event.handled = self.HandleMacros(pdMacros.index(padNum))
+                        self.RefreshMacros()
+                        self.UpdateAndRefreshWindowStates()
+                    else:
+                        event.handled = True #prevents a note off message
                     return 
 
                 # always handle nav
-                if(padNum in pdNav) and (pMap.Pressed): 
-                    event.handled = self.HandleNav(padNum)
-                    return 
+                if(padNum in pdNav):
+                    if (pMap.Pressed): 
+                        event.handled = self.HandleNav(padNum)
+                    else:
+                        event.handled = True #prevents a note off message
+                    return  
             return 
 
         # handle other "non" Pads
@@ -798,12 +804,12 @@ class TFireNFX():
             event.handled = True 
 
     def OnNoteOn(self,event):
-        # self.prnt('OnNoteOn()', utils.GetNoteName(event.data1),event.data1,event.data2)
+        #self.prnt('OnNoteOn()', utils.GetNoteName(event.data1),event.data1,event.data2)
         self.ShowNote(event.data1, True)
         pass
 
     def OnNoteOff(self,event):
-        # self.prnt('OnNoteOff()', utils.GetNoteName(event.data1),event.data1,event.data2)
+        #self.prnt('OnNoteOff()', utils.GetNoteName(event.data1),event.data1,event.data2)
         self.ShowNote(event.data1, False)
         pass
 
@@ -1156,7 +1162,7 @@ class TFireNFX():
 
         # print('Macro:', macro.Name, (macro.Execute==None))
         if(macro.Execute == None):
-            if( macro.Name == "Chan Rack"): #macIdx == 1):
+            if( macro.Name == "ChanRack"): #macIdx == 1):
                 self.ShowChannelRack(-1)
                 if(Settings.TOGGLE_CR_AND_BROWSER):
                     self.RefreshBrowserDisplay()    
