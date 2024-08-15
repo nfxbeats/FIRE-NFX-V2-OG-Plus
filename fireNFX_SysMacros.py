@@ -55,8 +55,8 @@ def Rename():
 
 # BUILT-IN MACROS DEFINED HERE
 # 
-macCloseAll = TnfxMacro("Close All", getShade(cCyan, shDim), CloseAll) # special 
-macTogChanRack = TnfxMacro("Chan Rack", cCyan) # internal
+macCloseAll = TnfxMacro("CloseAll", cOff, CloseAll) # special 
+macTogChanRack = TnfxMacro("ChanRack", cCyan) # internal
 macTogPlaylist = TnfxMacro("Playlist", cCyan) # internal 
 macTogMixer = TnfxMacro("Mixer", cCyan) # internal
 # 
@@ -72,9 +72,9 @@ macRename                   = TnfxMacro("Rename", cPurple, Rename)
 
 #Piano Roll
 macQuickQuantize            = TnfxMacro("Quantize", getShade(cGreen, shLight), QuickQuantize)
-macQuickPRFix               = TnfxMacro("Quant / Art", getShade(cGreen, shNorm), QuickPRFix)
-macTransposePROctaveUp      = TnfxMacro("Octave Up", getShade(cBlue, shLight), TransposePROctaveUp)
-macTransposePROctaveDown    = TnfxMacro("Octave Down", getShade(cBlue, shDark), TransposePROctaveDown)
+macQuickPRFix               = TnfxMacro("Quant/Art", getShade(cGreen, shNorm), QuickPRFix)
+macTransposePROctaveUp      = TnfxMacro("Oct Up", getShade(cBlue, shLight), TransposePROctaveUp)
+macTransposePROctaveDown    = TnfxMacro("Oct Down", getShade(cBlue, shDark), TransposePROctaveDown)
 
 PianoRollMacros = [macQuickQuantize, macQuickPRFix, macTransposePROctaveUp, macTransposePROctaveDown]
 

@@ -172,6 +172,8 @@ pdLeft = 61
 pdDown = 62
 pdRight = 63
 pdUDLR = [pdMenu, pdEsc, pdUp, pdEnter, pdTab, pdLeft, pdDown, pdRight]
+pdUDLRColors = [cBlue, cRed, cWhite, cGreen, cCyan, cWhite, cWhite, cWhite]
+pdUDLRText = ['Menu', 'Esc', 'Up', 'Enter', 'Tab', 'Left', 'Down', 'Right']
 
 # for modes that need channel specific window control - ie Note mode, FPC, etc
 pdShowChanEditor = 44
@@ -211,6 +213,7 @@ colRename = cOrange
 pdPresetPrev = 47
 pdPresetNext = 63
 pdPresetNav = [pdPresetPrev, pdPresetNext]
+pdPresetText = ['PresetUp', 'PresetDn']
 colPresetNav = [cWhite, cDimWhite]
 
 pdNoteRepeat = 46
@@ -222,12 +225,14 @@ colNoteRepeatLength = getShade(cOrange, shNorm)
 pdSnapUp = 45
 pdSnapDown = 61
 pdSnapNav = [pdSnapUp, pdSnapDown]
+pdSnapText = ['SnapUp', 'SnapDn']
 colSnapUp = getShade(cYellow, shNorm)
 colSnapDown = getShade(cYellow, shNorm)
 
 pdLayoutPrev = 45
 pdLayoutNext = 61
 pdLayoutNav = [pdLayoutPrev, pdLayoutNext]
+pdLayoutText = ['LayoutUp', 'LayoutDn']
 colLayoutPrev = getShade(cMagenta, shNorm)
 colLayoutNext = getShade(cMagenta, shDark)
 
@@ -243,6 +248,7 @@ colOctavePrev = getShade(cBlue, shLight)
 colOctaveNext = cBlue
 
 pdNoteFuncs = [pdScalePrev, pdScaleNext, pdRootNotePrev, pdRootNoteNext, pdOctavePrev, pdOctaveNext]
+pdNoteFuncsText = ['ScaleUp', 'ScaleDn', 'RootUp', 'RootDown', 'OctUp', 'OctDown']
 colNoteFuncs = [getShade(cGreen, shLight), cGreen, getShade(cPurple, shLight), cPurple, colOctavePrev, colOctaveNext]
 
 pdNavMacros = [45, 61, 46, 62, 47, 63]

@@ -447,6 +447,82 @@ def ColorToRGB(Color):
 def RGBToColor(R,G,B):
     return (R << 16) | (G << 8) | B
 
+def ColorScaleUp(rgb_int):
+    """
+    Scale an RGB color so that the maximum component reaches 255.
+    
+    :param rgb_int: An integer representing the RGB value (0xRRGGBB).
+    :return: An integer representing the scaled RGB value (0xRRGGBB).
+    """
+    # Extract the individual color components
+    red = (rgb_int >> 16) & 0xFF
+    green = (rgb_int >> 8) & 0xFF
+    blue = rgb_int & 0xFF
+    
+    # Find the maximum component value
+    max_component = max(red, green, blue)
+    
+    if max_component == 0:
+        # Avoid division by zero, return black (0x000000)
+        return 0
+    
+    # Calculate the scaling factor
+    desired_scale_factor = 255 / max_component
+
+    # Limit the scale factor to a maximum of 2.0
+    scale_factor = min(2.0, desired_scale_factor)
+    
+    # Scale each component
+    red = int(red * scale_factor)
+    green = int(green * scale_factor)
+    blue = int(blue * scale_factor)
+    
+    # Ensure that the values don't exceed 255 due to rounding
+    red = min(255, red)
+    green = min(255, green)
+    blue = min(255, blue)
+    
+    # Reassemble the RGB components
+    scaled_rgb_int = (red << 16) | (green << 8) | blue
+    
+    return scaled_rgb_int
+
+def ColorToDelphiColor(rgb_int):
+    """
+    Convert an RGB integer to a BGR integer.
+    
+    :param rgb_int: An integer representing the RGB value (0xRRGGBB).
+    :return: An integer representing the BGR value (0xBBGGRR).
+    """
+
+    rgb_int = ColorWithAlpha(ColorScaleUp(rgb_int), 20)
+
+    # Extract the individual color components
+    red = (rgb_int >> 16) & 0xFF   # Extract the Red component
+    green = (rgb_int >> 8) & 0xFF  # Extract the Green component
+    blue = rgb_int & 0xFF          # Extract the Blue component
+    
+    # Reassemble in BGR order
+    bgr_int = (blue << 16) | (green << 8) | red
+    
+    return bgr_int
+
+def ColorWithAlpha(color, alpha = 0):
+    """
+    Add an alpha channel to an integer RGB value.
+    
+    :param color: An integer representing the RGB value (0xRRGGBB).
+    :param alpha: An integer value for the alpha channel (0-255).
+    :return: An integer representing the RGBA value (0xAARRGGBB).
+    """
+    # Ensure alpha is within the valid range
+    alpha = max(0, min(255, alpha))
+    
+    # Shift RGB by 8 bits to the left and add the alpha value
+    rgba_int = (alpha << 24) | color
+    
+    return rgba_int
+
 def GradientTest(stepsize = 8):
     #def Gradient(color1, color2, stepsize, padOffs=0):
     #stepsize = 4 # 255//5
