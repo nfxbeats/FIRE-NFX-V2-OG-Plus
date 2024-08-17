@@ -126,6 +126,12 @@ FollowChannelFX = True
 lastFocus = -1
 lastWindowID = -1 # only tracks the basic windows with widXXXX values
 
+User1Knobs = []
+User2Knobs = []
+User3Knobs = []
+
+LastActiveWindow = TnfxWindow('', -1, -1)
+
 windowIDNames = {
             widMixer: 'Mixer', 
             widChannelRack: 'Channel Rack', 

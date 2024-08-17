@@ -203,6 +203,23 @@ class TnfxParameter:
     def updateCaption(self, caption):
         self.Caption = caption 
 
+class TnfxWindow:
+    def __init__(self, name, id, type):
+        self.Name = name
+        self.ID = id
+        self.Type = type
+    def __str__(self):
+        return "{}, '{}', {}".format(self.Name, self.ID, self.Type)
+
+class TnfxUserKnob:
+    def __init__(self, knobOffset, pluginName = '', paramOffset = -1, caption = ''):
+        self.Offset = paramOffset 
+        self.Caption = caption
+        self.PluginName = pluginName 
+        self.KnobOffset = knobOffset
+    def __str__(self):
+        return "{}, {}, '{}', {}, '{}'".format(self.PluginName, self.Offset, self.Caption, self.Value, self.ValueStr)
+
 class TnfxPadMode:
     def __init__(self, name, mode, btnId = IDStepSeq,  isAlt = False):
         self.Name = name 

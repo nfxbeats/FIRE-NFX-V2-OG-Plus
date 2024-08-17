@@ -105,6 +105,8 @@ PAD_Semitone =	1	#Retrieve semitone for pad specified by padIndex
 PAD_Color =	2	#Retrieve color for pad specified by padIndex    
 
 
+
+
 TransportCtrls = [IDPatternSong, IDPlay, IDStop, IDRec]
 ShiftAltCtrls = [IDShift, IDAlt]
 PadModeCtrls = [IDStepSeq, IDNote, IDDrum, IDPerform]

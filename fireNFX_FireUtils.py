@@ -75,7 +75,20 @@ def getColorMap():
     return ColorMap
 
 # Set the color of a pad, either directly or using the buffer
+
+# import inspect
+# pdNav = [ 44, 45, 46, 47,
+#           60, 61, 62, 63]
+
+
 def SetPadColor(idx, col, dimFactor, bSaveColor=True, bUseBuffer=False, dimMult=2.5):
+
+    # Get the caller's information from the stack
+    # if(idx in pdNav):
+    #     caller_info = inspect.stack()[1]
+    #     caller_function = caller_info.function
+    #     print(f"setcolor() was called by {caller_function}")
+
     if bUseBuffer:
         SetPadColorBuffer(idx, col, dimFactor, False)
     else:

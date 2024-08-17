@@ -7,6 +7,7 @@ if(general.getVersion() >= 37):
 
     def WriteINI( section, key, value):
         try:
+            #print('WriteINI()', section, key, value)
             # Create a config parser object
             config = configparser.ConfigParser()
             

@@ -73,9 +73,20 @@ class TFireNFX():
     def __init__(self):
         SetPallette(Settings.Pallette)
 
+
     #region FL MIDI API Events
     def OnInit(self):
         global ScrollTo 
+        global User1Knobs
+        global User2Knobs
+        global User3Knobs
+
+
+
+        for knob in range(4):
+            User1Knobs.append(TnfxUserKnob(knob)) 
+            User2Knobs.append(TnfxUserKnob(knob))
+            User3Knobs.append(TnfxUserKnob(knob))
 
         if Settings.SHOW_AUDIO_PEAKS:
             device.setHasMeters()
@@ -462,6 +473,7 @@ class TFireNFX():
             t = -1
             s = -1
             name = windowIDNames[newWID]
+            
             if(ui.getFocusedFormID() > 1000): # likely a mixer effect
                 focusedID = ui.getFocusedFormID()
                 t, s = self.getTrackSlotFromFormID(focusedID)
@@ -474,7 +486,7 @@ class TFireNFX():
                 if(plugins.isValid(chanIdx, -1)):
                     pname, uname, vname = getPluginNames(chanIdx, -1)
                     name =  pname + " (" + uname + ") Channel: " + str(chanIdx)
-            
+            # print('Focus: ', name, focusedID)
             # if(focusedID in [widMixer, widPlaylist, widChannelRack]):
             #     HandlePadModeChange(IDStepSeq)
 
@@ -518,6 +530,7 @@ class TFireNFX():
         if(HW_ChannelEvent & flags):
             self.CloseBrowser()
             self.UpdateChannelMap()  
+            
 
             # DirtyChannelFlags should have the specific CE_xxxx flags if needed
             # https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#OnDirtyChannelFlag
@@ -561,8 +574,10 @@ class TFireNFX():
                 #UpdateMixerMap(-2)
                 self.RefreshMixerStrip(True)
 
+        self.RefreshDisplay()
+
     def OnProjectLoad(self, status):
-        print('Window active:', self.isChannelMode(), self.isPlaylistMode(), self.isMixerMode())
+        #print('Window active:', self.isChannelMode(), self.isPlaylistMode(), self.isMixerMode())
         # status = 0 = starting load?
         if(status == 0):
             DisplayTextAll('Project Loading', '-', 'Please Wait...')
@@ -638,6 +653,10 @@ class TFireNFX():
         global pressisRepeating
         global isPMESafe
         global isModalWindowOpen
+        global User1Knobs
+        global User2Knobs
+        global User3Knobs
+
 
         ctrlID = event.data1 # the low level hardware id of a button, knob, pad, etc
         #self.prnt('OnMidiMsg', ctrlID, event.data2, 'status', event.status)
@@ -651,6 +670,8 @@ class TFireNFX():
             return 
 
         if(event.data1 in KnobCtrls) and (KnobMode in [KM_USER1, KM_USER2, KM_USER3]): # user defined knobs
+            knobOffset = KnobCtrls.index(event.data1)
+
             event.data1 += (KnobMode-KM_USER1) * 4 # so the CC is different for each user mode
             # self.prnt(self,'knob CC', event.data1)
             if not (event.status in [MIDI_NOTEON, MIDI_NOTEOFF]): # to prevent the mere touching of the knob generating a midi note event.
@@ -664,17 +685,32 @@ class TFireNFX():
 
                 event.handled = False # user modes, free
                 device.processMIDICC(event)
-            
+
+            # USER KNOB
+            if(KnobMode == KM_USER1):
+                userknob = User1Knobs[knobOffset]
+            elif(KnobMode == KM_USER2):
+                userknob = User2Knobs[knobOffset]
+            else:
+                userknob = User3Knobs[knobOffset]
+
             if (general.getVersion() > 9):
                 BaseID = EncodeRemoteControlID(device.getPortNumber(), 0, 0)
                 recEventIDIndex = device.findEventID(BaseID + event.data1, 0)
-                if recEventIDIndex != 2147483647:
+                if recEventIDIndex != 2147483647: # check if it has been assigned to a control yet... 
                     # show the name/value on the display
                     Name = device.getLinkedParamName(recEventIDIndex)
                     currVal = device.getLinkedValue(recEventIDIndex)
                     valstr = device.getLinkedValueString(recEventIDIndex)
                     Bipolar = device.getLinkedInfo(recEventIDIndex) == Event_Centered
                     DisplayBar2(Name, currVal, valstr, Bipolar)
+                    if (userknob.PluginName == ''):
+                        name = LastActiveWindow.Name # ui.getFocusedFormCaption()
+                        userknob.PluginName = name
+                        #print('assigning knob', name, 'tweak', Name)
+                    else:
+                        #print('knob', userknob.PluginName, 'tweak', Name, currVal, valstr, Bipolar)
+                        pass
 
         
         # handle a pad
@@ -691,7 +727,7 @@ class TFireNFX():
                 SetPadColor(padNum, col,dimBright, False) # False will not save the color to the ColorMap
             else: #released
                 pMap.Pressed = 0
-                SetPadColor(padNum, -1,dimNormal) # -1 will rever to the ColorMap color
+                # SetPadColor(padNum, -1, dimNormal) # -1 will rever to the ColorMap color
             
             # if no other pads held, reset the long press timer
             pMapPressed = next((x for x in PadMap if x.Pressed == 1), None) 
@@ -771,6 +807,7 @@ class TFireNFX():
                     if (pMap.Pressed): 
                         event.handled = self.HandleNav(padNum)
                     else:
+                        #self.RefreshNavPads()
                         event.handled = True #prevents a note off message
                     return  
             return 
@@ -804,12 +841,12 @@ class TFireNFX():
             event.handled = True 
 
     def OnNoteOn(self,event):
-        #self.prnt('OnNoteOn()', utils.GetNoteName(event.data1),event.data1,event.data2)
+        self.prnt('OnNoteOn()', utils.GetNoteName(event.data1),event.data1,event.data2)
         self.ShowNote(event.data1, True)
         pass
 
     def OnNoteOff(self,event):
-        #self.prnt('OnNoteOff()', utils.GetNoteName(event.data1),event.data1,event.data2)
+        self.prnt('OnNoteOff()', utils.GetNoteName(event.data1),event.data1,event.data2)
         self.ShowNote(event.data1, False)
         pass
 
@@ -1050,6 +1087,8 @@ class TFireNFX():
         return True
 
     def HandleNav(self,padIdx):
+        # print('HandleNav', padIdx)
+
         global NoteRepeat
         global SnapIdx
         hChanPads = PadMode.NavSet.ChanNav
@@ -1269,6 +1308,8 @@ class TFireNFX():
 
         if(padNum in pads):
             event.data1 = PadMap[padNum].NoteInfo.MIDINote
+            SetPadColor(padNum, PadMap[padNum].Color, dimNormal)
+            print("Pad {} Color: {}".format(padNum, PadMap[padNum].Color))  
             return False
         else:
             return True # mark as handled to prevent processing
@@ -1572,20 +1613,20 @@ class TFireNFX():
                         heldPadIdx = pdFPCB.index(pMapPressed.PadIndex) + 64 # internal offset for FPC Params Bank B
 
                 if ctrlID == IDKnob1:
-                    if(PadMode.Mode == MODE_DRUM) and (heldPadIdx > -1) and (self.isFPCActive(self)):
+                    if(PadMode.Mode == MODE_DRUM) and (heldPadIdx > -1) and (self.isFPCActive()):
                         return self.HandleKnobReal(recEventID + REC_Chan_Plugin_First + ppFPC_Volume.Offset + heldPadIdx, event.outEv, ppFPC_Volume.Caption, ppFPC_Volume.Bipolar)
                     else:
                         ui.crDisplayRect(0, chanNum, 0, 1, 10000, CR_ScrollToView + CR_HighlightChannelPanVol)
                         return self.HandleKnobReal(recEventID + REC_Chan_Vol,  value, 'Ch Vol: ' + chanName, False)
                 elif ctrlID == IDKnob2:
-                    if(PadMode.Mode == MODE_DRUM) and (heldPadIdx > -1) and (self.isFPCActive(self)):
+                    if(PadMode.Mode == MODE_DRUM) and (heldPadIdx > -1) and (self.isFPCActive()):
                         return self.HandleKnobReal(recEventID + REC_Chan_Plugin_First + ppFPC_Pan.Offset + heldPadIdx, event.outEv, ppFPC_Pan.Caption, ppFPC_Pan.Bipolar)
                     else:
                         ui.crDisplayRect(0, chanNum, 0, 1, 10000, CR_ScrollToView + CR_HighlightChannelPanVol)
                         return self.HandleKnobReal(recEventID + REC_Chan_Pan, value, 'Ch Pan: ' + chanName, True)
 
                 elif ctrlID == IDKnob3:
-                    if(PadMode.Mode == MODE_DRUM) and (heldPadIdx > -1) and (self.isFPCActive(self)):
+                    if(PadMode.Mode == MODE_DRUM) and (heldPadIdx > -1) and (self.isFPCActive()):
                         return self.HandleKnobReal(recEventID + REC_Chan_Plugin_First + ppFPC_Tune.Offset + heldPadIdx, event.outEv, ppFPC_Tune.Caption, ppFPC_Tune.Bipolar)
                     else:
                         return self.HandleKnobReal(recEventID + REC_Chan_FCut, value, 'Ch Flt: ' + chanName, False)
@@ -2412,6 +2453,9 @@ class TFireNFX():
         # refreshes the top two rows of the macro grid 
         self.prn(lvlA, 'RefreshMacros') 
         if self.isNoMacros():
+            for pad in pdMacros :
+                fireNFX_Bridge.WriteINI('Macros', 'macropad' + str(pdMacros.index(pad)), '---')
+                fireNFX_Bridge.WriteINI('Macros', 'macropadcolor' + str(pdMacros.index(pad)), cOff)            
             return 
         if(PadMode.NavSet.CustomMacros):
             for idx, pad in enumerate(pdMacroNav):
@@ -2458,6 +2502,9 @@ class TFireNFX():
             return 
 
         if(self.isNoNav()):
+            for pad in pdNav :
+                fireNFX_Bridge.WriteINI('Macros', 'macropad' + str(pdNav.index(pad)+8), '---')
+                fireNFX_Bridge.WriteINI('Macros', 'macropadcolor' + str(pdNav.index(pad)+8), cOff)            
             return
     # no
         
@@ -2542,9 +2589,11 @@ class TFireNFX():
             if(currChan == -1):
                 currChan = getCurrChanIdx()
             color = FLColorToPadColor(ChannelMap[currChan].Color)
-            SetPadColor(pdShowChanEditor, color, ChannelMap[currChan].DimA)
+            SetPadColor(pdShowChanEditor, color, dimNormal)
+            # SetPadColor(pdShowChanEditor, color, ChannelMap[currChan].DimA)
             fireNFX_Bridge.WriteINI('Macros', 'macropad' + str(pdNav.index(pdShowChanEditor) + 8), 'ChanEdit')
             fireNFX_Bridge.WriteINI('Macros', 'macropadcolor' + str(pdNav.index(pdShowChanEditor) + 8), color)
+            
             prColor = cWhite
             if(ui.getFocused(widPianoRoll)):
                 # SetPadColor(pdShowChanPianoRoll, ChannelMap[currChan].PadBColor, ChannelMap[currChan].DimB)            
@@ -2714,12 +2763,14 @@ class TFireNFX():
                 # else:
                 #     print('noinv', rootNote)
 
-                
-                self.MapNoteToPad(p, startnote + idx)
-
                 colIdx =  idx//changeEvery
+                color = colors[colIdx]
 
-                SetPadColor(p, colors[colIdx],dimNormal)
+                self.MapNoteToPad(p, startnote + idx, color)
+                SetPadColor(p, color, dimNormal)
+
+                
+
             
             self.RefreshDisplay()
         
@@ -2733,11 +2784,12 @@ class TFireNFX():
                 semitone = 0
                 color = cOff
                 dim = dimNormal
-                for idx, p in enumerate(pads): #pdFPCA:
+                for idx, p in enumerate(pads): 
                     color = plugins.getPadInfo(chanIdx, -1, PAD_Color, idx) #fpcpadIdx) # plugins.getColor(chanIdx, -1, GC_Semitone, fpcpadIdx)
                     semitone = plugins.getPadInfo(chanIdx, -1, PAD_Semitone, idx) #fpcpadIdx)
-                    self.MapNoteToPad(p, semitone)
-                    SetPadColor(p, FLColorToPadColor(color, 2), dim)
+                    color = FLColorToPadColor(color, 2)
+                    self.MapNoteToPad(p, semitone, color)
+                    SetPadColor(p, color, dim)
             else: # 
                 for p in pads:
                     SetPadColor(p, cOff,dimNormal)
@@ -2746,7 +2798,7 @@ class TFireNFX():
         #RefreshMacros() 
         #RefreshNavPads()
 
-    def MapNoteToPad(self,padNum, note):
+    def MapNoteToPad(self,padNum, note, color):
         global NoteMap
         global PadMap
         global NoteMapDict
@@ -2758,6 +2810,7 @@ class TFireNFX():
         
         # maintain these here for now
         PadMap[padNum].NoteInfo.MIDINote = note
+        PadMap[padNum].Color = color
         NoteMap[padNum] = note
 
     def RefreshFPCSelector(self):
@@ -2765,6 +2818,9 @@ class TFireNFX():
 
         if len(pdFPCChannels) == 0:
             DisplayTimedText('No FPC')
+            return
+        
+        if not self.isFPCActive():
             return
 
         # go through the FPC selector pads...
@@ -2818,7 +2874,7 @@ class TFireNFX():
             mode = 'Channel'
         
         if usermode > 0:
-            mode +=  '(USER ' + str(usermode) + ')'
+            mode = 'USER ' + str(usermode)
         
         SendCC(IDKnobModeLEDArray, value | 16)
 
@@ -2842,7 +2898,7 @@ class TFireNFX():
             if self.isChannelMode():
                 chanNum = channels.selectedChannel()
                 chanName = channels.getChannelName(chanNum)
-                modetext = str(chanNum) + ' - ' + chanName 
+                modetext = chanName 
                 knobs = ['Volume', 'Pan', 'Filter', 'Filter Res']
                 if self.isFPCActive():
                     fireNFX_Bridge.WriteINI('Knobs', 'ModeAlt', 'Held Pad')
@@ -2851,14 +2907,23 @@ class TFireNFX():
             elif self.isMixerMode():
                 mixerNum = mixer.trackNumber()
                 mixerName = mixer.getTrackName(mixerNum) 
-                modetext = str(mixerNum) + ' - ' + mixerName
+                modetext = mixerName
                 modealt = 'SHIFT'
+                modealt2 = 'ALT'
                 knobs = ['Volume', 'Pan', 'Filter', 'Filter Res']
                 knobs  = ['Volume', 'Pan', 'EQ Lo Gain', 'EQ Mid Gain']
                 knobsa = ['', 'Stereo Sep', 'EQ Lo Freq', 'EQ Mid Freq']
         else:
-            
-            modetext = 'X: '
+
+            if self.isChannelMode():
+                chanNum = channels.selectedChannel()
+                chanName = channels.getChannelName(chanNum)            
+                modetext = ' ' + chanName
+            elif self.isKnownMixerEffectActive():
+                slotIdx, slotName, pluginName = self.GetActiveMixerEffectSlotInfo()
+                mixerNum = mixer.trackNumber()
+                mixerName = mixer.getTrackName(mixerNum) 
+                modetext = ' ' + mixerName + ' - ' + pluginName
 
             for idx, knobID in enumerate(KnobCtrls):
                 knobRecID = knobID + ( (KnobMode-KM_USER1) * 4 )
@@ -2869,6 +2934,12 @@ class TFireNFX():
                     if recEventIDIndex != 2147483647:
                         # show the name/value on the display
                         paramName = device.getLinkedParamName(recEventIDIndex)
+                        if KnobMode == KM_USER1:
+                            paramName = User1Knobs[idx].PluginName + ' - ' + paramName
+                        elif KnobMode == KM_USER2:
+                            paramName = User2Knobs[idx].PluginName + ' - ' + paramName
+                        elif KnobMode == KM_USER3:
+                            paramName = User3Knobs[idx].PluginName + ' - ' + paramName
                 knobs[idx] = paramName
         
         fireNFX_Bridge.WriteINI('Knobs', 'ModeText', modetext)
@@ -3229,8 +3300,8 @@ class TFireNFX():
             if( len(ChannelMap) > (chanIdx - 1)):
                 self.UpdateChannelMap()
             
-            patName = patterns.getPatternName(patterns.patternNumber())
             cMap = ChannelMap[chanIdx]
+            patName = patterns.getPatternName(patterns.patternNumber())
         
             if(self.isChannelMode()):
                 offset += 1
@@ -3829,6 +3900,7 @@ class TFireNFX():
         global PadMode
         global lastFocus
         global lastWindowID
+        global LastActiveWindow
 
         if(PadMode.Mode == MODE_PERFORM):
             return 
@@ -3838,6 +3910,21 @@ class TFireNFX():
         isEffectFocused = formID == widPluginEffect  # ui.getFocused(widPlugin) or ui.getFocused(widPluginGenerator)
         prevFormID = lastFocus
         lastFocus = formID
+        focusedformCaption = ui.getFocusedFormCaption()
+        focusformID = ui.getFocusedFormID()
+
+
+        wintype = -1
+        if(isPluginFocused):
+            wintype = 1
+        elif isEffectFocused:
+            wintype = 2
+        
+        if (wintype > -1):
+            LastActiveWindow.Name = remove_non_printable(focusedformCaption)
+            # print('law', LastActiveWindow.Name)
+            LastActiveWindow.Type = wintype
+            LastActiveWindow.ID = focusformID
 
         self.UpdateLastWindowID(formID)
         #print('formID', formID)
@@ -4255,7 +4342,7 @@ class TFireNFX():
                     rowOffset = 16 * revRow  # rows start on 0,16,32,48
                     padIdx = rowOffset + colOffset
 
-                    self.MapNoteToPad(padIdx, noteVal)
+                    self.MapNoteToPad(padIdx, noteVal, cRed)
 
                     if(row == 3): # and (GetScaleNoteCount(scale) == 7): #chord row
                         PadMap[padIdx].NoteInfo.ChordNum = colOffset + 1
@@ -4920,6 +5007,7 @@ class TFireNFX():
 
         # ShowChanRack = showVal
         self.OnRefresh(HW_Dirty_FocusedWindow)
+        
 
         
 
@@ -5086,8 +5174,12 @@ class TFireNFX():
         
         if(note in noteDict):
             pads = noteDict[note]
-            for pad in pads:
-                SetPadColor(pad,  getNotePadColor(pad), dim, False)
+            if PadMode.Mode == MODE_NOTE:
+                for pad in pads:
+                    SetPadColor(pad,  getNotePadColor(pad), dim, False)
+            elif PadMode.Mode == MODE_DRUM:
+                for pad in pads:
+                    SetPadColor(pad,  PadMap[pad].Color, dim, False)
 
     
     def DrumPads(self):

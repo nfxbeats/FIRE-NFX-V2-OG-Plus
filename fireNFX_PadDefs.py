@@ -2,7 +2,7 @@
 # Defines how the pads are mapped in various modes.
 #
 from fireNFX_Colors import *
-from fireNFX_Utils import *
+from fireNFX_Utils import * 
 
 # defines the pads when used as a set from 0..63
 pdAllPads = [i for i in range(64)] 
