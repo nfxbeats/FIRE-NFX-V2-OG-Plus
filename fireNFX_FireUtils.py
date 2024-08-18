@@ -94,6 +94,10 @@ def SetPadColor(idx, col, dimFactor, bSaveColor=True, bUseBuffer=False, dimMult=
     else:
         SetPadColorDirect(idx, col, dimFactor, bSaveColor, dimMult)
 
+def map_range(x, in_min, in_max, out_min, out_max):
+    # Apply the linear transformation formula
+    return int( (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min )
+
 def scaleColorForFire(color, maxValue=127):
     """
     Scales RGB values to ensure the maximum value does not exceed 127.
@@ -108,6 +112,9 @@ def scaleColorForFire(color, maxValue=127):
         r = int(r * scale_factor)
         g = int(g * scale_factor)
         b = int(b * scale_factor)
+        # r = map_range(r, 20,255, 0, 127)
+        # g = map_range(g, 20,255, 0, 127)
+        # b = map_range(b, 20,255, 0, 127)
     
     return nfxutils.RGBToColor(r, g, b), r, g, b
 
@@ -203,12 +210,16 @@ def PadColorToFLColor(padcolor):
     r = min(255, int(r * scaleby))
     g = min(255, int(g * scaleby))
     b = min(255, int(b * scaleby))
+    # r = map_range(r, 0, 127, 20, 255)
+    # g = map_range(g, 0, 127, 20, 255)
+    # b = map_range(b, 0, 127, 20, 255)
     a = min(255, a)
+    print('FL Color',r, g, b, a)
     return nfxutils.RGBAToColor(r, g, b, a)
 
 
 # Convert an FL color to a pad-compatible color, with optional division for brightness adjustment
-def FLColorToPadColor(FLColor, div=2):
+def FLColorToPadColor(FLColor, dim = 1):
 
     if FLColor == None:
         return 0
@@ -216,15 +227,6 @@ def FLColorToPadColor(FLColor, div=2):
     color, r, g, b = scaleColorForFire(FLColor)
     return color 
 
-    # padcolor = FLColor & 0xFFFFFF
-    # r = (padcolor >> 16) & 0xFF
-    # g = (padcolor >> 8) & 0xFF
-    # b = padcolor & 0xFF
-
-    # # if _FixChannelColors:
-    # #     r, g, b = [0 if x == 20 else x for x in (r, g, b)]
-
-    # return nfxutils.RGBToColor(r, g, b)
 
 # Transition the color of a pad from a start color to an end color over a specified duration
 def TransitionPadColor(idx, start_col, end_col, duration=1.0, steps=10):

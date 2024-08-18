@@ -19,6 +19,14 @@ import fireNFX_Persist as persist
 from fireNFX_Colors import *
 from fireNFX_Defs import NotesListFlats, NotesListSharps
 class TnfxDefaultSettings:
+    def __getattr__(self, item):
+        # This is called only if the attribute is not found in the usual way
+        return f"MISSING: {item}"
+
+    def add_field(self, field_name, value):
+        # Add a new field programmatically
+        setattr(self, field_name, value)
+    
     def __init__(self) -> None:
         # color of pads when pressed.
         self.PAD_PRESSED_COLOR = cYellow
@@ -178,7 +186,10 @@ if not persist.load_object(Settings, 'Settings.json'):
 else:
     print('Settings.json found and loaded.')
 
+
 # no longer user changeable
 Settings.DIM_DIM = 2
 Settings.DIM_NORMAL = 1
 Settings.DIM_BRIGHT = 0    
+
+

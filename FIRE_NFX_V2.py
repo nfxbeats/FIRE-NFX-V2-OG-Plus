@@ -72,6 +72,9 @@ class TFireNFX():
 
     def __init__(self):
         SetPallette(Settings.Pallette)
+        if 'MISSING' in Settings.DEVMODE:
+            Settings.add_field('DEVMODE', "0")
+            persist.save_object(Settings, 'Settings.json')
 
 
     #region FL MIDI API Events
@@ -902,27 +905,25 @@ class TFireNFX():
 
             if(not isChannelStripB): # its the A strip
 
-                if(newChanIdx == prevChanIdx): # if it's already on the channel, toggle the windows
-                    if( not PadMode.NavSet.ColorPicker):
-                        
-                        if(ShiftHeld) and (Settings.SHOW_CHANNEL_MUTES): # new
-                            if(DoubleTap):
-                                ui.showWindow(widPianoRoll)
-                                macZoom.Execute(Settings.DBL_TAP_ZOOM)                     
-                            else: 
-                                self.ShowPianoRoll(-1) 
-                        else: 
-                            self.ShowChannelEditor(-1)
-                else:
-                    self.SelectAndShowChannel(newChanIdx)
-
                 if(PadMode.NavSet.ColorPicker): # color picker mode
                     if(self,not isChannelStripB):
-                        OrigColor = FLColorToPadColor(channels.getChannelColor(getCurrChanIdx()), 1)
-                        channels.setChannelColor(getCurrChanIdx(), NewColor)
+                        OrigColor = FLColorToPadColor(channels.getChannelColor(getCurrChanIdx()), 1) # xxxx
+                        channels.setChannelColor(getCurrChanIdx(), PadColorToFLColor(NewColor))
                         self.RefreshColorPicker()
                     self.SetPadMode()
                     return True
+                elif(newChanIdx == prevChanIdx): # if it's already on the channel, toggle the windows
+                    if(ShiftHeld) and (Settings.SHOW_CHANNEL_MUTES): # new
+                        if(DoubleTap):
+                            ui.showWindow(widPianoRoll)
+                            macZoom.Execute(Settings.DBL_TAP_ZOOM)                     
+                        else: 
+                            self.ShowPianoRoll(-1) 
+                    else: 
+                        self.ShowChannelEditor(-1)
+                else:
+                    self.SelectAndShowChannel(newChanIdx)
+
 
             else: # is B STrip
                 if(ShiftHeld):
@@ -1574,7 +1575,8 @@ class TFireNFX():
             valstr = f'#{NewColor:06x}'.upper()
             DisplayBar2(Name, value, valstr, False)
 
-            self.RefreshColorPicker()
+            SetPadColor(pdNewColor, NewColor, dimBright)
+            # self.RefreshColorPicker()
 
             return True
 
@@ -2884,6 +2886,10 @@ class TFireNFX():
 
 
     def UpdateBridgeKnobs(self):
+        if Settings.DEVMODE in ["0"]:
+            fireNFX_Bridge.WriteINI('Knobs', 'ModeText', 'Not Yet Implemented')
+            return
+        
         knobs  = ['', '', '', '']
         knobsa = ['', '', '', '']
         knobsb = ['', '', '', '']
@@ -2925,22 +2931,50 @@ class TFireNFX():
                 mixerName = mixer.getTrackName(mixerNum) 
                 modetext = ' ' + mixerName + ' - ' + pluginName
 
-            for idx, knobID in enumerate(KnobCtrls):
-                knobRecID = knobID + ( (KnobMode-KM_USER1) * 4 )
+
+
+            if self.isKnownPlugin():
+                pl = self.getPlugin(channels.selectedChannel())   
                 paramName = ''
-                if (general.getVersion() > 9):
-                    BaseID = EncodeRemoteControlID(device.getPortNumber(), 0, 0)
-                    recEventIDIndex = device.findEventID(BaseID + knobRecID, 0)
-                    if recEventIDIndex != 2147483647:
-                        # show the name/value on the display
-                        paramName = device.getLinkedParamName(recEventIDIndex)
-                        if KnobMode == KM_USER1:
-                            paramName = User1Knobs[idx].PluginName + ' - ' + paramName
-                        elif KnobMode == KM_USER2:
-                            paramName = User2Knobs[idx].PluginName + ' - ' + paramName
-                        elif KnobMode == KM_USER3:
-                            paramName = User3Knobs[idx].PluginName + ' - ' + paramName
-                knobs[idx] = paramName
+                for idx, knobID in enumerate(KnobCtrls):
+                    knobRecID = knobID + ( (KnobMode-KM_USER1) * 4 )
+                    User1Knobs[idx] = TnfxUserKnob(idx, pluginName = pl.Name, paramOffset = pl.User1Knobs[idx].Offset, caption = pl.User1Knobs[idx].Caption)
+                    # print('added', idx, pl.Name, pl.User1Knobs[idx].Offset, pl.User1Knobs[idx].Caption)
+                    User2Knobs[idx] = TnfxUserKnob(idx, pluginName = pl.Name, paramOffset = pl.User2Knobs[idx].Offset, caption = pl.User2Knobs[idx].Caption)
+                    User3Knobs[idx] = TnfxUserKnob(idx, pluginName = pl.Name, paramOffset = pl.User3Knobs[idx].Offset, caption = pl.User3Knobs[idx].Caption)
+                    # if (general.getVersion() > 9):
+                        # BaseID = EncodeRemoteControlID(device.getPortNumber(), 0, 0)
+                        # recEventIDIndex = device.findEventID(BaseID + knobRecID, 0)
+                        # if recEventIDIndex != 2147483647:
+                        #     # show the name/value on the display
+                        #     paramName = device.getLinkedParamName(recEventIDIndex)
+                        #     print('linked', recEventIDIndex, paramName)
+                    if KnobMode == KM_USER1:
+                        paramName = pl.User1Knobs[idx].Caption
+                    elif KnobMode == KM_USER2:
+                        paramName = pl.User2Knobs[idx].Caption
+                    elif KnobMode == KM_USER3:
+                        paramName = pl.User3Knobs[idx].Caption
+                    knobs[idx] = paramName
+
+
+            else: # custom user macros
+                for idx, knobID in enumerate(KnobCtrls):
+                    knobRecID = knobID + ( (KnobMode-KM_USER1) * 4 )
+                    paramName = ''
+                    if (general.getVersion() > 9):
+                        BaseID = EncodeRemoteControlID(device.getPortNumber(), 0, 0)
+                        recEventIDIndex = device.findEventID(BaseID + knobRecID, 0)
+                        if recEventIDIndex != 2147483647:
+                            # show the name/value on the display
+                            paramName = device.getLinkedParamName(recEventIDIndex)
+                            if KnobMode == KM_USER1:
+                                paramName = User1Knobs[idx].PluginName + ' - ' + paramName
+                            elif KnobMode == KM_USER2:
+                                paramName = User2Knobs[idx].PluginName + ' - ' + paramName
+                            elif KnobMode == KM_USER3:
+                                paramName = User3Knobs[idx].PluginName + ' - ' + paramName
+                    knobs[idx] = paramName
         
         fireNFX_Bridge.WriteINI('Knobs', 'ModeText', modetext)
         fireNFX_Bridge.WriteINI('Knobs', 'ModeAlt', modealt)
@@ -3674,7 +3708,7 @@ class TFireNFX():
                 patterns.setPatternName(pat, Settings.PATTERN_NAME.format(pat))
 
             patMap = TnfxPattern(pat, patterns.getPatternName(pat))
-            patMap.Color = FLColorToPadColor(patterns.getPatternColor(pat), 1)  
+            patMap.Color = FLColorToPadColor(patterns.getPatternColor(pat))  
             patMap.Selected = patterns.isPatternSelected(pat)
 
 
