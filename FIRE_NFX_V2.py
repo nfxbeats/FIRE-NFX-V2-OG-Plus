@@ -10,7 +10,7 @@
 # thanks to GeorgBit (#GS comments in code) for velocity curve for accent mode featue.
 #
 
-VERSION = "2.2024.0531"
+VERSION = "2.2024.0819"
 print('VERSION ' + VERSION)   
 
 import device
@@ -2088,6 +2088,8 @@ class TFireNFX():
         global menuHistory
         global FLChannelFX
         # global ShowBrowser
+
+        self.prnt('handle browser button', ShiftHeld, AltHeld)
 
         # in a menu
         if (ui.isInPopupMenu()):
@@ -5053,7 +5055,7 @@ class TFireNFX():
         global resetAutoHide
         global prevNavSet
 
-        isAutoHide = ui.isBrowserAutoHide(self) # or Settings.ALWAYS_HIDE_BROWSER
+        isAutoHide = ui.isBrowserAutoHide() # or Settings.ALWAYS_HIDE_BROWSER
 
         if(showVal == -1): # toggle
             if(ui.getFocused(widBrowser)):
@@ -5062,7 +5064,7 @@ class TFireNFX():
                 showVal = 1        
             
         if(showVal == 1):
-            if(self.isAutoHide):
+            if(isAutoHide):
                 resetAutoHide = True
                 ui.setBrowserAutoHide(False)  # if hidden it will become visible
                 # shoudl show automatically
@@ -5070,7 +5072,7 @@ class TFireNFX():
                 ui.showWindow(widBrowser)
 
             if(Settings.FORCE_UDLR_ON_BROWSER):
-                self.ForceNaveSet(nsUDLR)
+                self.ForceNavSet(nsUDLR)
 
         else: # closing
             if(self.isAutoHide):

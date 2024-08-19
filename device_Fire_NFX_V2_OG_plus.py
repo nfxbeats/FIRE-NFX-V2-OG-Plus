@@ -85,7 +85,7 @@ def OnMidiIn(event):
     # isModalWindowOpen = (event.pmeFlags & PME_System_Safe == 0)
     # isPMESafe = (event.pmeFlags & PME_System != 0)
     # if(not isPMESafe):
-    #     print('PME Flags:', event.pmeFlags, '      PME Safe:', isPMESafe, '         Modal Window:', isModalWindowOpen)
+    # print('MidiIn PME Flags:', event.pmeFlags, '      PME Safe:', isPMESafe, '         Modal Window:', isModalWindowOpen)
     #     event.handled = True
     #     return 
 
@@ -104,6 +104,10 @@ def OnMidiIn(event):
         Fire.OnMidiIn(event)
 
 def OnMidiMsg(event):
+    # isModalWindowOpen = (event.pmeFlags & PME_System_Safe == 0)
+    # isPMESafe = (event.pmeFlags & PME_System != 0)
+    # # if(not isPMESafe):
+    # print('MidiMsg PME Flags:', event.pmeFlags, '      PME Safe:', isPMESafe, '         Modal Window:', isModalWindowOpen)
     Fire.OnMidiMsg(event)
 
 def OnRefresh(Flags):
