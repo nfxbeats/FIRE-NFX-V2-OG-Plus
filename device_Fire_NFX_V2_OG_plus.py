@@ -81,6 +81,15 @@ def OnMidiIn(event):
 
     ctrlID = event.data1
 
+
+    isModalWindowOpen = (event.pmeFlags & PME_System_Safe == 0)
+    isPMESafe = (event.pmeFlags & PME_System != 0)
+    if(not isPMESafe) or (isModalWindowOpen):
+        print('PME Flags:', event.pmeFlags, '      PME Safe:', isPMESafe, '         Modal Window:', isModalWindowOpen)
+        event.handled = True
+        return 
+
+
     if(ctrlID == IDShift):
         _ShiftHeld = (event.data2 > 0)
     elif(ctrlID == IDAlt):
