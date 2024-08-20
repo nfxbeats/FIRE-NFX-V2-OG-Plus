@@ -844,12 +844,12 @@ class TFireNFX():
             event.handled = True 
 
     def OnNoteOn(self,event):
-        self.prnt('OnNoteOn()', utils.GetNoteName(event.data1),event.data1,event.data2)
+        #self.prnt('OnNoteOn()', utils.GetNoteName(event.data1),event.data1,event.data2)
         self.ShowNote(event.data1, True)
         pass
 
     def OnNoteOff(self,event):
-        self.prnt('OnNoteOff()', utils.GetNoteName(event.data1),event.data1,event.data2)
+        #self.prnt('OnNoteOff()', utils.GetNoteName(event.data1),event.data1,event.data2)
         self.ShowNote(event.data1, False)
         pass
 
@@ -2689,21 +2689,29 @@ class TFireNFX():
 
         self.GetScaleGrid(ScaleIdx, rootNote, baseOctave, invert) #this will populate PadMap.NoteInfo
 
+        dim = dimNormal
+
         for p in pdWorkArea:
             color = cDimWhite
             if(self.isChromatic()): #chromatic,
                 if(len(utils.GetNoteName(PadMap[p].NoteInfo.MIDINote) ) > 2): # is black key?
-                    color = cDimWhite #-1
+                    color = cOff # cDimWhite #-1
                 else:
                     color = cWhite 
+                    dim = dimNormal
             # elif(ChromaticOverlay):
 
             else: #non chromatic
                 if(PadMap[p].NoteInfo.IsRootNote) and (showRoot):
+                    dim = dimNormal
                     if(Settings.ROOT_NOTE_COLOR == cChannel):
                         color = FLColorToPadColor(channels.getChannelColor(getCurrChanIdx()))
                     else:
                         color = Settings.ROOT_NOTE_COLOR
+                else:
+                    color = cOff #cWhite
+                    dim = dimDim
+
 
             if(ShowChords) and (GetScaleNoteCount(ScaleIdx) == 7):
                 if(p in pdChordBar):
@@ -2714,7 +2722,7 @@ class TFireNFX():
                     SetPadColor(p, color,dimNormal)
                 self.RefreshChordType()
             else:
-                SetPadColor(p, color,dimNormal)
+                SetPadColor(p, color, dim)
 
             NoteColorMap[p].PadColor = color
 
@@ -4326,6 +4334,7 @@ class TFireNFX():
         global ScaleIdx
         global NoteMap
         global NoteMapDict
+        global RootNoteMap
 
         if(len(HarmonicScalesLoaded) == 0):
             InitScales()
@@ -4340,6 +4349,7 @@ class TFireNFX():
         gridlen = 12
 
         ScaleNotes.clear()
+        RootNoteMap.clear()
 
         if(isAltMode) and (PadMode.Mode == MODE_DRUM):
             harmonicScaleIdx = HarmonicScalesLoaded[0]
@@ -4394,7 +4404,12 @@ class TFireNFX():
                             if(padIdx not in NoteMapDict[noteVal]):
                                 NoteMapDict[noteVal].append(padIdx)
 
-                    PadMap[padIdx].NoteInfo.IsRootNote = (colOffset % notesInScale) == 0 # (colOffset == 0) or (colOffset == notesInScale)
+                    isRoot = (colOffset % notesInScale) == 0
+                    PadMap[padIdx].NoteInfo.IsRootNote = isRoot #(colOffset % notesInScale) == 0 # (colOffset == 0) or (colOffset == notesInScale)
+                    if isRoot:
+                        RootNoteMap.append(noteVal)
+
+
 
             ScaleDisplayText = NotesList[faveNoteIdx] + str(startOctave) + " " + HarmonicScaleNamesT[harmonicScaleIdx]
 
@@ -5202,15 +5217,24 @@ class TFireNFX():
             return
 
         dim =dimNormal
-        
+
+        isRoot = False
+        showRoot = not self.isChromatic() and PadMode.Mode == MODE_NOTE
+
+
         if(isOn):
             dim =dimBright
+        else:
+            dim =dimDim
         
         noteDict = NoteMapDict
         
         if(note in noteDict):
             pads = noteDict[note]
             if PadMode.Mode == MODE_NOTE:
+                if showRoot and not isOn:
+                    if note in RootNoteMap:
+                        dim = dimNormal
                 for pad in pads:
                     SetPadColor(pad,  getNotePadColor(pad), dim, False)
             elif PadMode.Mode == MODE_DRUM:

@@ -103,6 +103,7 @@ DebugMin = lvlD
 # list of notes that are mapped to pads
 NoteMap = list()
 NoteMapDict = {}
+RootNoteMap = list()
 #_FPCNotesDict = {}
 
 SongPos = 0
