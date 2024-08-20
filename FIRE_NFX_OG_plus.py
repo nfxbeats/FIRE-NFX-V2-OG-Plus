@@ -281,9 +281,6 @@ class TFire():
         pass
 
 
-    def OnSysEx(self, event):
-        pass
-
     def OnControlChange(self, event):
         pass
 
@@ -662,7 +659,7 @@ class TFire():
                 else:
                     fakeMidi.data1 = IDPatternUp
                 fakeMidi.data2 = 127
-                OnMidiMsg(fakeMidi)
+                self.OnMidiMsg(fakeMidi) # NFX
         else:
             self.PatBtnHeldTime = 0
             self.PatBtnHeldTriggerTime = HeldButtonRetriggerTime # reset to max time
@@ -687,7 +684,7 @@ class TFire():
                 oldAlt = self.AltHeld
                 self.ShiftHeld = False
                 self.AltHeld = False
-                OnMidiMsg(fakeMidi)
+                self.OnMidiMsg(fakeMidi)
                 self.ShiftHeld = oldShift
                 self.AltHeld = oldAlt
         else:
@@ -738,7 +735,7 @@ class TFire():
         if (res < 0) & (self.ScreenMode != ScreenModeNone):
             i = self.ScreenMode
             self.ScreenMode = ScreenModeNone
-            self.Setself.ScreenMode(i)
+            self.SetScreenMode(i)
 
         screen.animateText(self.ScreenMode)
         t = time.time()
@@ -748,7 +745,8 @@ class TFire():
             self.IdleFPS = 0
         else:
             if t < self.LastIdleSec:
-                i = Integer((Int64(t) + 0x100000000) - Int64(self.LastIdleSec))
+                # i = Integer((Int64(t) + 0x100000000) - Int64(self.LastIdleSec)) # rewrote for syntax issues. python doesnt support Integer or Int64
+                i = int((int(t) + 0x100000000) - int(self.LastIdleSec))
             else:
                 i = (t - self.LastIdleSec)
             if i >= 1000:
@@ -829,9 +827,9 @@ class TFire():
                 # if (self.CurrentDrumMode == DrumModeFPCCenter):
                 #     Data1 += 4 # offset to match center layout
                 Data1 = self.GetFPCNoteValue(Data1)
-            elif self.CurrentDrumMode == self.DrumModeSlicex:
+            elif self.CurrentDrumMode == DrumModeSlicex:
                 Data1 = self.GetSlicexNoteValue(Data1)
-            elif self.CurrentDrumMode == self.DrumModeOmni:
+            elif self.CurrentDrumMode == DrumModeOmni:
                 Data1 = self.GetOmniNoteValue(Data1)
             if Data1 < 0:
                 Result = False
@@ -900,8 +898,9 @@ class TFire():
 
                 event.handled = True
 
-    def GetTimeForPad(self, Device, PadNum):
-        Result = (self.GetChanRackStartPos() + PadNum - ((PadNum // PadsStride) * PadsStride)) * RecPPS
+    # def GetTimeForPad(self, Device, PadNum):
+    #     Result = (self.GetChanRackStartPos() + PadNum - ((PadNum // PadsStride) * PadsStride)) * RecPPS
+    #     return Result # added - NFX
 
     def GetChannelNumForPad(self, PadNum):
 
@@ -915,21 +914,22 @@ class TFire():
 
         return Result
 
-    def GetEventForPad(self, PadNum):
+    # def GetEventForPad(self, PadNum):
 
-        Result = -1
-        chNum = self.GetChannelNumForPad(Device, PadNum)
-        if chNum > -1:
-            cID = channels.getChannelIndex(chNum)
-            Time = self.GetTimeForPad(Device, PadNum)
-            if Assigned(PatInfoT[patterns.patternNumber()].NoteRecChan):
-                for i in range(0, Count):
-                    Event = pNoteEvent(GetEventAtPos(i))
-                    if (Event.ChanID == cID) & (((Event.Time // RecPPS) * RecPPS) == Time):
-                        Result = pRecEvent(Event)
-                        return
+    #     Result = -1
+    #     #chNum = self.GetChannelNumForPad(Device, PadNum)
+    #     chNum = self.GetChannelNumForPad(PadNum) # NFX fixed too many args
+    #     if chNum > -1:
+    #         cID = channels.getChannelIndex(chNum)
+    #         Time = self.GetTimeForPad(Device, PadNum)
+    #         if Assigned(PatInfoT[patterns.patternNumber()].NoteRecChan):
+    #             for i in range(0, Count):
+    #                 Event = pNoteEvent(GetEventAtPos(i))
+    #                 if (Event.ChanID == cID) & (((Event.Time // RecPPS) * RecPPS) == Time):
+    #                     Result = pRecEvent(Event)
+    #                     return
 
-        return Result
+    #     return Result
 
     def OnMidiMsg(self, event):
 
@@ -1132,11 +1132,11 @@ class TFire():
                     else:
                         self.CurrentMode = self.CurrentMode + self.Sign(i)
                         if (self.CurrentMode < ModePadVisFirst) | (self.CurrentMode > ModePadVisLast):
-                            self.CurrentMode = self.ModeAnalyzerNone
+                            self.CurrentMode = ModeAnalyzerNone
                         print(self.CurrentMode)
                         self.TopText = ModeVisNamesT[0]
 
-                    if self.CurrentMode == self.ModeAnalyzerNone:
+                    if self.CurrentMode == ModeAnalyzerNone:
                         self.CurrentMode = self.NonVisMode
                     else:
                         self.TopText = ModeVisNamesT[self.CurrentMode + 1 - ModePadVisFirst]
@@ -1157,21 +1157,21 @@ class TFire():
                 else:
                     i = 0
                 if i != 0:
-                    if (self.ScreenMode < self.ScreenModeFirst) | (self.ScreenMode > self.ScreenModeLast):
+                    if (self.ScreenMode < ScreenModeFirst) | (self.ScreenMode > ScreenModeLast):
                         if self.Sign(i) > 0:
-                            i = self.ScreenModeFirst
+                            i = ScreenModeFirst
                         else:
-                            i = self.ScreenModeLast
+                            i = ScreenModeLast
                     else:
                         i = self.ScreenMode + self.Sign(i)
-                        if (i < self.ScreenModeFirst) | (i > self.ScreenModeLast):
+                        if (i < ScreenModeFirst) | (i > ScreenModeLast):
                             i = ScreenModeNone
-                        self.TopText = self.ScreenModeNamesT[0]
+                        self.TopText = ScreenModeNamesT[0]
 
                     if i != ScreenModeNone:
-                        self.TopText = self.ScreenModeNamesT[i + 1 - self.ScreenModeFirst]
+                        self.TopText = ScreenModeNamesT[i + 1 - ScreenModeFirst]
                     self.TopTextTimer = TextDisplayTime
-                    self.Setself.ScreenMode(i)
+                    self.SetScreenMode(i)
 
                 event.handled = True
 
@@ -1289,14 +1289,14 @@ class TFire():
                                 self.CurrentDrumMode  += 1
                             else:
                                 self.CurrentDrumMode -= 1
-                            if self.CurrentDrumMode > self.DrumModeLast:
+                            if self.CurrentDrumMode > DrumModeLast:
                                 self.CurrentDrumMode = 0
                             elif self.CurrentDrumMode < 0:
-                                self.CurrentDrumMode = self.DrumModeLast
+                                self.CurrentDrumMode = DrumModeLast
                             self.CutPlayingNotes()
                             self.ClearBtnMap()
                             self.RefreshDrumMode(True)
-                            self.DisplayTimedText(self.DrumModesNamesT[self.CurrentDrumMode])
+                            self.DisplayTimedText(DrumModesNamesT[self.CurrentDrumMode])
 
                         elif self.BrowserMode:
                             text = ui.navigateBrowserMenu(event.data2, self.ShiftHeld)
@@ -1344,7 +1344,7 @@ class TFire():
                     else:
                         event.outEv = event.inEv
                     event.isIncrement = 1
-                    if (self.CurrentKnobsMode == self.KnobsModeChannelRack) & (self.CurrentMode == ModeStepSeq) & self.AccentMode:
+                    if (self.CurrentKnobsMode == KnobsModeChannelRack) & (self.CurrentMode == ModeStepSeq) & self.AccentMode:
 
                         if event.data1 == IDKnob1:
                             self.AccentParams.Vel = utils.Limited(self.AccentParams.Vel + self.AdaptKnobVal(event.outEv), 0, 127)
@@ -1372,7 +1372,7 @@ class TFire():
                         self.HeldPadsChanged = True
                         self.ChangeFlag = True
 
-                    elif self.CurrentKnobsMode == self.KnobsModeChannelRack:
+                    elif self.CurrentKnobsMode == KnobsModeChannelRack:
                         selChanNum = channels.channelNumber()
                         if selChanNum < 0:
                             return
@@ -1385,7 +1385,7 @@ class TFire():
                         elif event.data1 == IDKnob4:
                             HandleKnob(channels.getRecEventId(selChanNum) + REC_Chan_FRes, self.AdaptKnobVal(event.outEv), 'Chan Filter BW', False)
 
-                    elif self.CurrentKnobsMode == self.KnobsModeMixer:
+                    elif self.CurrentKnobsMode == KnobsModeMixer:
 
                         self.CurrentMixerTrack = mixer.trackNumber()
                         if (self.CurrentMixerTrack < 0) | (self.CurrentMixerTrack >= mixer.getTrackInfo(TN_Sel)):
@@ -1402,7 +1402,7 @@ class TFire():
 
                     else:
                         event.handled = False # user modes, free
-                        event.data1 += (self.CurrentKnobsMode - self.KnobsModeUser1) * 4 # so the CC is different for each user mode
+                        event.data1 += (self.CurrentKnobsMode - KnobsModeUser1) * 4 # so the CC is different for each user mode
                         device.processMIDICC(event)
                         if (general.getVersion() > 9):
                           BaseID = EncodeRemoteControlID(device.getPortNumber(), 0, 0)
@@ -1446,7 +1446,7 @@ class TFire():
                                 else:
                                     event.handled = True
                                     return #: nothing
-                            elif self.CurrentDrumMode == self.DrumModeSlicex:
+                            elif self.CurrentDrumMode == DrumModeSlicex:
                                 event.data1 = self.GetSlicexNoteValue(event.data1)
                                 if event.midiId == MIDI_NOTEON:
                                     self.PlayingNotes.append(event.data1)
@@ -1454,7 +1454,7 @@ class TFire():
                                     self.PlayingNotes.remove(event.data1)
                                 event.handled = False
                                 return
-                            elif self.CurrentDrumMode == self.DrumModeOmni:
+                            elif self.CurrentDrumMode == DrumModeOmni:
 
                                 event.data1 = self.GetOmniNoteValue(event.data1)
                                 if event.midiId == MIDI_NOTEON:
@@ -1653,7 +1653,7 @@ class TFire():
                                 if self.CurrentMode == ModeNotes:
                                     self.DisplayTimedText(self.GetNoteModeName())
                                 else:
-                                    self.DisplayTimedText(self.DrumModesNamesT[self.CurrentDrumMode])
+                                    self.DisplayTimedText(DrumModesNamesT[self.CurrentDrumMode])
 
                         elif (self.CurrentMode == ModeStepSeq) & self.JogWheelPushed & (not self.AltHeld) & (channels.channelNumber(True) >= 0):
                             self.MixerTrackSelectionMode = not self.MixerTrackSelectionMode
@@ -1743,7 +1743,7 @@ class TFire():
                         m = 1
                     if (event.midiId == MIDI_NOTEON):
                         if self.AltHeld:
-                            transport.globalTransport(FPT_WindowJog, m, PME_System | PME_FromMidi)
+                            transport.globalTransport(FPT_WindowJog, m, PME_System | PME_FromMIDI)
                         elif self.BrowserMode:
                             if (event.data1 == IDBankL):
                                 ui.closeActivePopupMenu()
@@ -1767,7 +1767,8 @@ class TFire():
                                     if channels.isGraphEditorVisible(): # Change to the new parameter
                                       channels.showGraphEditor(False, pShift, p, channels.getChannelIndex(chNum), 0)
                                     else: # Open the graph editor to the current channel, step & parameter
-                                      channels.showGraphEditor(False, pShift, p, heldChan.ChanIndex, 0)
+                                      #channels.showGraphEditor(False, pShift, p, heldChan.ChanIndex, 0)
+                                      channels.showGraphEditor(False, pShift, p, channels.getChannelIndex(chNum), 0) # NFX
 
                                 self.HeldPadsChanged = True
                             else:
@@ -2045,7 +2046,7 @@ class TFire():
                 OG_plus_nfx_Helpers.SetPadColor(pad, color, dim)
 
 
-        elif self.CurrentDrumMode == self.DrumModeSlicex:
+        elif self.CurrentDrumMode == DrumModeSlicex:
             for x in range(0, PadsW):
                 for y in range(0, PadsH):
                     if (playingNote >= 0) & (self.GetSlicexNoteValue(x + y * PadsStride) == playingNote):
@@ -2055,7 +2056,7 @@ class TFire():
                     else:
                         AddPadDataRGB2(x, y, colors[5]) # default pad color
 
-        elif self.CurrentDrumMode == self.DrumModeOmni:  # show a pad per channel
+        elif self.CurrentDrumMode == DrumModeOmni:  # show a pad per channel
             maxChan = min(channels.channelCount(), 64)
             for n in range(0, maxChan):
                 y = n // PadsStride
@@ -2701,11 +2702,12 @@ class TFire():
         self.SlaveLayoutSelectionMode = True # so the slave layout selection menu shows up immediately on the slaved device
         self.DisplayTimedText(SlaveModeLayoutNamesT[self.SlaveModeLayout])
 
-    def Sign(self, Value):
-        if Value >= 0: 
-            return 1
-        else: 
-            return -1
+    # removed the func because it is already define on line 351
+    # def Sign(self, Value):
+    #     if Value >= 0: 
+    #         return 1
+    #     else: 
+    #         return -1
 
     def SetChanRackOfs(self, Value, Dispatch = True):
 
@@ -2787,10 +2789,19 @@ class TFire():
         y = Step // PadsStride
         x = Step - y * PadsStride
         chanIndex = y + self.GetChanRackOfs()
+        Step =  x + self.GetChanRackStartPos() #NFX
+
         if utils.InterNoSwap(chanIndex, 0, channels.channelCount() - 1):
-            if channels.getGridBit(chanIndex, x + self.GetChanRackStartPos()) == 0:
-                channels.setGridBit(chanIndex, x + self.GetChanRackStartPos(), 1) # make sure the step is enabled | it won't work !
-            channels.setStepParameterByIndex(channels.getChannelIndex(chanIndex), patterns.patternNumber(), x + self.GetChanRackStartPos(), Param, Value, 1)
+            if channels.getGridBit(chanIndex, Step) == 0:
+                channels.setGridBit(chanIndex, Step, 1) # make sure the step is enabled | it won't work !
+            index = channels.getChannelIndex(chanIndex) # NFX
+            patNum = patterns.patternNumber() # NFX
+            Step =  x + self.GetChanRackStartPos() # NFX
+            #print('SetStepParam' ,index, patNum, Step , Param, Value, False) 
+            if(general.getVersion() >= 37):
+                channels.setStepParameterByIndex(index, patNum, Step , Param, Value)  # removed last parameter - NFX
+            else:
+                channels.setStepParameterByIndex(index, patNum, Step , Param, Value, 1)
 
     def ShowCurrentPadMode(self):
 
@@ -3030,7 +3041,7 @@ class TFire():
         self.AnalyzerFlipX = True
         self.AnalyzerMode = AnalyzerPeakVol
         self.AnalyzerChannel = 0
-      elif mode == self.ModeAnalyzerRight:
+      elif mode == ModeAnalyzerRight:
         self.AnalyzerScrollX = True
         self.AnalyzerFlipX = False
         self.AnalyzerMode = AnalyzerPeakVol

@@ -5231,6 +5231,7 @@ class TFireNFX():
         
         noteDict = NoteMapDict
         
+        
         if(note in noteDict):
             pads = noteDict[note]
             if PadMode.Mode == MODE_NOTE:
