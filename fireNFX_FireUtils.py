@@ -214,7 +214,7 @@ def PadColorToFLColor(padcolor):
     # g = map_range(g, 0, 127, 20, 255)
     # b = map_range(b, 0, 127, 20, 255)
     a = min(255, a)
-    print('FL Color',r, g, b, a)
+    #print('FL Color',r, g, b, a)
     return nfxutils.RGBAToColor(r, g, b, a)
 
 

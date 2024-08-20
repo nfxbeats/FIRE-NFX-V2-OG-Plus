@@ -791,7 +791,7 @@ def Pallette(jumpBy = 64):
     for r in range(0,128, jumpBy):
         for g in range(0,128, jumpBy):
             for b in range(0,128, jumpBy):
-                print('pad', pad % 64, 'rgb', r,g,b, 'hex', hex(RGBToColor(r,g,b)) )
+                #print('pad', pad % 64, 'rgb', r,g,b, 'hex', hex(RGBToColor(r,g,b)) )
                 SetPadColor(pad % 64, RGBToColor(r,g,b), 0)
                 pad+= 1
                 

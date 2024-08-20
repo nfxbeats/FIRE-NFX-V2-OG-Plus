@@ -1310,7 +1310,7 @@ class TFireNFX():
         if(padNum in pads):
             event.data1 = PadMap[padNum].NoteInfo.MIDINote
             SetPadColor(padNum, PadMap[padNum].Color, dimNormal)
-            print("Pad {} Color: {}".format(padNum, PadMap[padNum].Color))  
+            #print("Pad {} Color: {}".format(padNum, PadMap[padNum].Color))  
             return False
         else:
             return True # mark as handled to prevent processing
@@ -5225,7 +5225,9 @@ class TFireNFX():
         if(isOn):
             dim =dimBright
         else:
-            dim =dimDim
+            dim =dimNormal
+            if PadMode.Mode == MODE_DRUM:
+                dim =dimNormal
         
         noteDict = NoteMapDict
         
@@ -5236,10 +5238,16 @@ class TFireNFX():
                     if note in RootNoteMap:
                         dim = dimNormal
                 for pad in pads:
-                    SetPadColor(pad,  getNotePadColor(pad), dim, False)
+                    color = getNotePadColor(pad)
+                    if color == cOff and isOn:
+                        color = Settings.PAD_PRESSED_COLOR                    
+                    SetPadColor(pad,  color, dim, False)
             elif PadMode.Mode == MODE_DRUM:
                 for pad in pads:
-                    SetPadColor(pad,  PadMap[pad].Color, dim, False)
+                    color = PadMap[pad].Color
+                    # if color == cOff and isOn:
+                    #     color = Settings.PAD_PRESSED_COLOR
+                    SetPadColor(pad,  color, dim, False)
 
     
     def DrumPads(self):
