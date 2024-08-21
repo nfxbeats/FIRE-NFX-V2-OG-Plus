@@ -10,7 +10,7 @@
 # thanks to GeorgBit (#GS comments in code) for velocity curve for accent mode featue.
 #
 
-VERSION = "2.2024.0819"
+VERSION = "2.2024.0821"
 print('VERSION ' + VERSION)   
 
 import device
@@ -27,7 +27,8 @@ import plugins
 import playlist
 import arrangement
 
-from math import exp, log   #GS
+import math
+# from math import exp, log   #GS
 
 from fireNFX_Utils import * 
 from fireNFX_Display import *
@@ -70,6 +71,12 @@ import fireNFX_Bridge
 
 class TFireNFX():
 
+    BridgeDisplayText1 = ""
+    BridgeDisplayText2 = ""
+    BridgeDisplayText3 = ""
+
+    BridgeMacros = {}
+
     def __init__(self):
         SetPallette(Settings.Pallette)
         if 'MISSING' in Settings.DEVMODE:
@@ -87,7 +94,7 @@ class TFireNFX():
 
 
         for knob in range(4):
-            User1Knobs.append(TnfxUserKnob(knob)) 
+            User1Knobs.append(TnfxUserKnob(knob))
             User2Knobs.append(TnfxUserKnob(knob))
             User3Knobs.append(TnfxUserKnob(knob))
 
@@ -146,8 +153,8 @@ class TFireNFX():
         # turn of the lights and go to bed...
         self.ClearAllPads()
         SendCC(IDKnobModeLEDArray, 16)
-        for ctrlID in getNonPadLightCtrls():
-            SendCC(ctrlID, 0)
+        for ctrl_ID in getNonPadLightCtrls():
+            SendCC(ctrl_ID, 0)
         
         self.Reset()
 
@@ -297,29 +304,6 @@ class TFireNFX():
                 self.UpdateAndRefreshProgressAndMarkers()
             SongLen = currSongLen
         
-    def OnMidiMsg2(self,event):
-        if(event.data1 in KnobCtrls) and (KnobMode in [KM_USER1, KM_USER2, KM_USER3]): # user defined knobs
-            # this code from the original script with slight modification:
-            data2 = event.data2
-            event.inEv = event.data2
-            if event.inEv >= 0x40:
-                event.outEv = event.inEv - 0x80
-            else:
-                event.outEv = event.inEv
-            event.isIncrement = 1
-
-            event.handled = False # user modes, free
-            event.data1 += (KnobMode-KM_USER1) * 4 # so the CC is different for each user mode
-            device.processMIDICC(self,event)
-            
-            if (general.getVersion() > 9):
-                BaseID = EncodeRemoteControlID(device.getPortNumber(), 0, 0)
-                eventId = device.findEventID(BaseID + event.data1, 0)
-                if eventId != 2147483647:
-                    s = device.getLinkedParamName(eventId)
-                    s2 = device.getLinkedValueString(eventId)
-                    DisplayTextAll(s, s2, '')        
-
     def OnUpdateBeatIndicator(self,value):
         global Beat
         if(not transport.isPlaying()):
@@ -760,7 +744,7 @@ class TFireNFX():
                 if(self.isKnownMixerEffectActive()) and (padNum in ParamPadMapDict.keys()):
                     self.RefreshEffectMapping()
                     if(padNum in ParamPadMapDict.keys()):
-                        self.ForceNaveSet(nsNone)
+                        self.ForceNavSet(nsNone)
                         event.handled = self.HandleEffectPads(padNum)
                         return 
 
@@ -799,7 +783,7 @@ class TFireNFX():
                 if(padNum in pdMacros):
                     if (pMap.Pressed): 
                         event.handled = self.HandleMacros(pdMacros.index(padNum))
-                        self.RefreshMacros()
+                        # self.RefreshMacros()
                         self.UpdateAndRefreshWindowStates()
                     else:
                         event.handled = True #prevents a note off message
@@ -851,9 +835,6 @@ class TFireNFX():
     def OnNoteOff(self,event):
         #self.prnt('OnNoteOff()', utils.GetNoteName(event.data1),event.data1,event.data2)
         self.ShowNote(event.data1, False)
-        pass
-
-    def OnSysEx(self, event):
         pass
 
     #endregion 
@@ -1269,21 +1250,21 @@ class TFireNFX():
         return False # to continue processing regular notes
 
     def HandleDrums(self,event, padNum):
-        global isRepeating
+        # global isRepeating
         global OrigColor
 
         event.data2 = self.translateVelocity(event.data2)
 
         # do the note repeat BEFORE changing the note so the note is retriggered properly
-        if(NoteRepeat):
-            if(event.data2 < 32): # min velocity is 32, so anything below that s/b note off
-                device.stopRepeatMidiEvent()
-                isRepeating = False
-            elif(not isRepeating):
-                isRepeating = True
-                ui.setSnapMode(BeatLengthSnap[_NoteRepeatLengthIdx])
-                ms = self.getBeatLenInMS(BeatLengthDivs[_NoteRepeatLengthIdx])
-                device.repeatMidiEvent(event, ms, ms)
+        # if(NoteRepeat):
+        #     if(event.data2 < 32): # min velocity is 32, so anything below that s/b note off
+        #         device.stopRepeatMidiEvent()
+        #         isRepeating = False
+        #     elif(not isRepeating):
+        #         isRepeating = True
+        #         ui.setSnapMode(BeatLengthSnap[_NoteRepeatLengthIdx])
+        #         ms = self.getBeatLenInMS(BeatLengthDivs[_NoteRepeatLengthIdx])
+        #         device.repeatMidiEvent(event, ms, ms)
 
         # if(PadMode.NavSet.ColorPicker): # color picker mode
         #     pads = DrumPads(self)
@@ -1525,6 +1506,8 @@ class TFireNFX():
                     SetPadColor(pad, cOff,dimNormal)
 
             self.RefreshModes()
+
+        self.RefreshMacroGrid()
         return True
 
     def HandleKnobMode(self):
@@ -2110,7 +2093,6 @@ class TFireNFX():
 
             self.RefreshBrowserDisplay()
             self.UpdateAndRefreshWindowStates()
-            
             return True
 
         #
@@ -2287,8 +2269,7 @@ class TFireNFX():
         self.UpdateMixerMap(-1)
         self.RefreshPageLights()
         self.RefreshModes()
-        self.RefreshMacros()
-        self.RefreshNavPads()
+        self.RefreshMacroGrid()
         self.RefreshDisplay()
         self.UpdateAndRefreshWindowStates()
         return 
@@ -2321,6 +2302,7 @@ class TFireNFX():
                 self.RefreshChannelStrip(ScrollTo)
 
             ScrollTo = False
+
         elif(PadMode.Mode == MODE_NOTE):
             self.RefreshNotes()
         elif(PadMode.Mode == MODE_PERFORM):
@@ -2458,17 +2440,20 @@ class TFireNFX():
         self.prn(lvlA, 'RefreshMacros') 
         if self.isNoMacros():
             for pad in pdMacros :
-                fireNFX_Bridge.WriteINI('Macros', 'macropad' + str(pdMacros.index(pad)), '---')
-                fireNFX_Bridge.WriteINI('Macros', 'macropadcolor' + str(pdMacros.index(pad)), cOff)            
+                self.BridgeMacros[pad] = TnfxMacro('---', cOff, None)
+                # fireNFX_Bridge.WriteINI('Macros', 'macropad' + str(pdMacros.index(pad)), '---')
+                # fireNFX_Bridge.WriteINI('Macros', 'macropadcolor' + str(pdMacros.index(pad)), cOff)            
             return 
         if(PadMode.NavSet.CustomMacros):
             for idx, pad in enumerate(pdMacroNav):
+                self.BridgeMacros[pad] = TnfxMacro(CustomMacros[idx].Name, CustomMacros[idx].PadColor, None)
                 SetPadColor(pad, CustomMacros[idx].PadColor,dimNormal)
         else:
             for idx, pad in enumerate(pdMacros):
                 SetPadColor(pad, MacroList[idx].PadColor,dimNormal)
-                fireNFX_Bridge.WriteINI('Macros', 'macropad' + str(idx), MacroList[idx].Name)
-                fireNFX_Bridge.WriteINI('Macros', 'macropadcolor' + str(idx), ColorWithAlpha( MacroList[idx].PadColor) )
+                self.BridgeMacros[pad] = TnfxMacro(MacroList[idx].Name, MacroList[idx].PadColor, None)
+                # fireNFX_Bridge.WriteINI('Macros', 'macropad' + str(idx), MacroList[idx].Name)
+                # fireNFX_Bridge.WriteINI('Macros', 'macropadcolor' + str(idx), ColorWithAlpha( MacroList[idx].PadColor) )
 
     def RefreshMarkers(self):
         for pad in pdMarkers:
@@ -2507,21 +2492,24 @@ class TFireNFX():
 
         if(self.isNoNav()):
             for pad in pdNav :
-                fireNFX_Bridge.WriteINI('Macros', 'macropad' + str(pdNav.index(pad)+8), '---')
-                fireNFX_Bridge.WriteINI('Macros', 'macropadcolor' + str(pdNav.index(pad)+8), cOff)            
+                self.BridgeMacros[pad] = TnfxMacro('---', cOff, None)
+                # fireNFX_Bridge.WriteINI('Macros', 'macropad' + str(pdNav.index(pad)+8), '---')
+                # fireNFX_Bridge.WriteINI('Macros', 'macropadcolor' + str(pdNav.index(pad)+8), cOff)            
             return
     # no
         
         #clear first
         for pad in pdNav :
             SetPadColor(pad, cOff,dimNormal, False)
-            fireNFX_Bridge.WriteINI('Macros', 'macropad' + str(pdNav.index(pad)+8), '---')
-            fireNFX_Bridge.WriteINI('Macros', 'macropadcolor' + str(pdNav.index(pad)+8), cOff)
+            self.BridgeMacros[pad] = TnfxMacro('---', cOff, None)
+            # fireNFX_Bridge.WriteINI('Macros', 'macropad' + str(pdNav.index(pad)+8), '---')
+            # fireNFX_Bridge.WriteINI('Macros', 'macropadcolor' + str(pdNav.index(pad)+8), cOff)
         
         if(showRename):
             SetPadColor(pdRename, colRename, dimNormal)
-            fireNFX_Bridge.WriteINI('Macros', 'macropad' + str(pdNav.index(pdRename)+8), 'Rename')
-            fireNFX_Bridge.WriteINI('Macros', 'macropadcolor' + str(pdNav.index(pdRename)+8), colRename) 
+            self.BridgeMacros[pdRename] = TnfxMacro('Rename', colRename, None)
+            # fireNFX_Bridge.WriteINI('Macros', 'macropad' + str(pdNav.index(pdRename)+8), 'Rename')
+            # fireNFX_Bridge.WriteINI('Macros', 'macropadcolor' + str(pdNav.index(pdRename)+8), colRename) 
 
         if(showChanWinNav) or (showPRNav):
             self.RefreshChanWinNav(currChan)
@@ -2531,14 +2519,15 @@ class TFireNFX():
                 color = colPresetNav[idx]
                 name = pdPresetText[idx]
                 SetPadColor(pad, color,dimNormal)
-                fireNFX_Bridge.WriteINI('Macros', 'macropad' + str(pdNav.index(pad)+8), name)
-                fireNFX_Bridge.WriteINI('Macros', 'macropadcolor' + str(pdNav.index(pad)+8), color)
+                self.BridgeMacros[pad] = TnfxMacro(name, color, None)
+                # fireNFX_Bridge.WriteINI('Macros', 'macropad' + str(pdNav.index(pad)+8), name)
+                # fireNFX_Bridge.WriteINI('Macros', 'macropadcolor' + str(pdNav.index(pad)+8), color)
 
         if(showPRNav):
             for idx, macro in enumerate(PianoRollMacros):
                 padIdx = pdNavMacros[idx]
                 SetPadColor(padIdx, macro.PadColor,dimNormal)
-                #TODO bridge write
+                self.BridgeMacros[padIdx] = TnfxMacro(macro.Name, macro.PadColor, None)
             return 
 
         # these two are exclusive as they use the same pads in diff modes
@@ -2547,46 +2536,53 @@ class TFireNFX():
                 color = colNoteFuncs[idx]
                 text =  pdNoteFuncsText[idx]
                 SetPadColor(pad, color,dimNormal)
-                fireNFX_Bridge.WriteINI('Macros', 'macropad' + str(pdNav.index(pad)+8), text)
-                fireNFX_Bridge.WriteINI('Macros', 'macropadcolor' + str(pdNav.index(pad)+8), color)
+                self.BridgeMacros[pad] = TnfxMacro(text, color, None)
+                # fireNFX_Bridge.WriteINI('Macros', 'macropad' + str(pdNav.index(pad)+8), text)
+                # fireNFX_Bridge.WriteINI('Macros', 'macropadcolor' + str(pdNav.index(pad)+8), color)
 
 
         elif(showOctaveNav) and (not showNoteRepeat): 
             SetPadColor(pdOctaveNext, colOctaveNext,dimNormal)
             SetPadColor(pdOctavePrev, colOctavePrev,dimNormal)
-            fireNFX_Bridge.WriteINI('Macros', 'macropad' + str(pdNav.index(pdOctaveNext)+8), 'OctUp')
-            fireNFX_Bridge.WriteINI('Macros', 'macropadcolor' + str(pdNav.index(pdOctaveNext)+8), colOctaveNext)
-            fireNFX_Bridge.WriteINI('Macros', 'macropad' + str(pdNav.index(pdOctavePrev)+8), 'OctDown')
-            fireNFX_Bridge.WriteINI('Macros', 'macropadcolor' + str(pdNav.index(pdOctavePrev)+8), colOctavePrev)
+            self.BridgeMacros[pdOctaveNext] = TnfxMacro('OctUp', colOctaveNext, None)
+            self.BridgeMacros[pdOctavePrev] = TnfxMacro('OctDown', colOctavePrev, None)
+            # fireNFX_Bridge.WriteINI('Macros', 'macropad' + str(pdNav.index(pdOctaveNext)+8), 'OctUp')
+            # fireNFX_Bridge.WriteINI('Macros', 'macropadcolor' + str(pdNav.index(pdOctaveNext)+8), colOctaveNext)
+            # fireNFX_Bridge.WriteINI('Macros', 'macropad' + str(pdNav.index(pdOctavePrev)+8), 'OctDown')
+            # fireNFX_Bridge.WriteINI('Macros', 'macropadcolor' + str(pdNav.index(pdOctavePrev)+8), colOctavePrev)
             
 
-        if(showNoteRepeat):
-            if(NoteRepeat):
-                SetPadColor(pdNoteRepeat, colNoteRepeat,dimBright)
-                SetPadColor(pdNoteRepeatLength, colNoteRepeatLength,dimDim)
-            else:
-                SetPadColor(pdNoteRepeat, colNoteRepeat,dimNormal)
-                SetPadColor(pdNoteRepeatLength, colNoteRepeatLength,dimDim)
-            fireNFX_Bridge.WriteINI('Macros', 'macropad' + str(pdNav.index(pdNoteRepeat)+8), 'NoteRpt')
-            fireNFX_Bridge.WriteINI('Macros', 'macropadcolor' + str(pdNav.index(pdNoteRepeat)+8), colNoteRepeat)
-            fireNFX_Bridge.WriteINI('Macros', 'macropad' + str(pdNav.index(pdNoteRepeatLength)+8), 'NoteRptLen')
-            fireNFX_Bridge.WriteINI('Macros', 'macropadcolor' + str(pdNav.index(pdNoteRepeatLength)+8), colNoteRepeatLength)
+        # if(showNoteRepeat):
+        #     if(NoteRepeat):
+        #         SetPadColor(pdNoteRepeat, colNoteRepeat,dimBright)
+        #         SetPadColor(pdNoteRepeatLength, colNoteRepeatLength,dimDim)
+        #     else:
+        #         SetPadColor(pdNoteRepeat, colNoteRepeat,dimNormal)
+        #         SetPadColor(pdNoteRepeatLength, colNoteRepeatLength,dimDim)
+        #     fireNFX_Bridge.WriteINI('Macros', 'macropad' + str(pdNav.index(pdNoteRepeat)+8), 'NoteRpt')
+        #     fireNFX_Bridge.WriteINI('Macros', 'macropadcolor' + str(pdNav.index(pdNoteRepeat)+8), colNoteRepeat)
+        #     fireNFX_Bridge.WriteINI('Macros', 'macropad' + str(pdNav.index(pdNoteRepeatLength)+8), 'NoteRptLen')
+        #     fireNFX_Bridge.WriteINI('Macros', 'macropadcolor' + str(pdNav.index(pdNoteRepeatLength)+8), colNoteRepeatLength)
 
         # these two are exclusive as they use the same pads in diff modes
         if(showSnapNav):
             SetPadColor(pdSnapUp, colSnapUp,dimNormal)
             SetPadColor(pdSnapDown, colSnapDown,dimDim)
-            fireNFX_Bridge.WriteINI('Macros', 'macropad' + str(pdNav.index(pdSnapUp)+8), 'SnapUp')
-            fireNFX_Bridge.WriteINI('Macros', 'macropadcolor' + str(pdNav.index(pdSnapUp)+8), colSnapUp)
-            fireNFX_Bridge.WriteINI('Macros', 'macropad' + str(pdNav.index(pdSnapDown)+8), 'SnapDown')
-            fireNFX_Bridge.WriteINI('Macros', 'macropadcolor' + str(pdNav.index(pdSnapDown)+8), colSnapDown)
+            self.BridgeMacros[pdSnapUp] = TnfxMacro('SnapUp', colSnapUp, None)
+            self.BridgeMacros[pdSnapDown] = TnfxMacro('SnapDown', colSnapDown, None)
+            # fireNFX_Bridge.WriteINI('Macros', 'macropad' + str(pdNav.index(pdSnapUp)+8), 'SnapUp')
+            # fireNFX_Bridge.WriteINI('Macros', 'macropadcolor' + str(pdNav.index(pdSnapUp)+8), colSnapUp)
+            # fireNFX_Bridge.WriteINI('Macros', 'macropad' + str(pdNav.index(pdSnapDown)+8), 'SnapDown')
+            # fireNFX_Bridge.WriteINI('Macros', 'macropadcolor' + str(pdNav.index(pdSnapDown)+8), colSnapDown)
         elif(showLayoutNav):
             SetPadColor(pdLayoutPrev, colLayoutPrev,dimNormal)
             SetPadColor(pdLayoutNext, colLayoutNext,dimNormal)
-            fireNFX_Bridge.WriteINI('Macros', 'macropad' + str(pdNav.index(pdLayoutPrev)+8), 'LayoutUp')
-            fireNFX_Bridge.WriteINI('Macros', 'macropadcolor' + str(pdNav.index(pdLayoutPrev)+8), colLayoutPrev)
-            fireNFX_Bridge.WriteINI('Macros', 'macropad' + str(pdNav.index(pdLayoutNext)+8), 'LayoutDown')
-            fireNFX_Bridge.WriteINI('Macros', 'macropadcolor' + str(pdNav.index(pdLayoutNext)+8), colLayoutNext)
+            self.BridgeMacros[pdLayoutPrev] = TnfxMacro('LayoutUp', colLayoutPrev, None)
+            self.BridgeMacros[pdLayoutNext] = TnfxMacro('LayoutDown', colLayoutNext, None)
+            # fireNFX_Bridge.WriteINI('Macros', 'macropad' + str(pdNav.index(pdLayoutPrev)+8), 'LayoutUp')
+            # fireNFX_Bridge.WriteINI('Macros', 'macropadcolor' + str(pdNav.index(pdLayoutPrev)+8), colLayoutPrev)
+            # fireNFX_Bridge.WriteINI('Macros', 'macropad' + str(pdNav.index(pdLayoutNext)+8), 'LayoutDown')
+            # fireNFX_Bridge.WriteINI('Macros', 'macropadcolor' + str(pdNav.index(pdLayoutNext)+8), colLayoutNext)
 
     def RefreshChanWinNav(self,currChan = -1):
         if (PadMode.NavSet.ChanNav):
@@ -2595,16 +2591,18 @@ class TFireNFX():
             color = FLColorToPadColor(ChannelMap[currChan].Color)
             SetPadColor(pdShowChanEditor, color, dimNormal)
             # SetPadColor(pdShowChanEditor, color, ChannelMap[currChan].DimA)
-            fireNFX_Bridge.WriteINI('Macros', 'macropad' + str(pdNav.index(pdShowChanEditor) + 8), 'ChanEdit')
-            fireNFX_Bridge.WriteINI('Macros', 'macropadcolor' + str(pdNav.index(pdShowChanEditor) + 8), color)
+            self.BridgeMacros[pdShowChanEditor] = TnfxMacro('ChanEdit', color, None)
+            # fireNFX_Bridge.WriteINI('Macros', 'macropad' + str(pdNav.index(pdShowChanEditor) + 8), 'ChanEdit')
+            # fireNFX_Bridge.WriteINI('Macros', 'macropadcolor' + str(pdNav.index(pdShowChanEditor) + 8), color)
             
             prColor = cWhite
             if(ui.getFocused(widPianoRoll)):
                 # SetPadColor(pdShowChanPianoRoll, ChannelMap[currChan].PadBColor, ChannelMap[currChan].DimB)            
                 prColor = color 
             SetPadColor(pdShowChanPianoRoll, prColor,dimBright)
-            fireNFX_Bridge.WriteINI('Macros', 'macropad' + str(pdNav.index(pdShowChanPianoRoll) + 8), 'PianoRoll')
-            fireNFX_Bridge.WriteINI('Macros', 'macropadcolor' + str(pdNav.index(pdShowChanPianoRoll) + 8), prColor)
+            self.BridgeMacros[pdShowChanPianoRoll] = TnfxMacro('PianoRoll', prColor, None)
+            # fireNFX_Bridge.WriteINI('Macros', 'macropad' + str(pdNav.index(pdShowChanPianoRoll) + 8), 'PianoRoll')
+            # fireNFX_Bridge.WriteINI('Macros', 'macropadcolor' + str(pdNav.index(pdShowChanPianoRoll) + 8), prColor)
 
     def RefreshPageLights(self, clearOnly = False):
         global PadMode
@@ -3423,18 +3421,28 @@ class TFireNFX():
         DisplayTextMiddle(midtext)
         DisplayTextBottom(bottext)
 
-        fireNFX_Bridge.WriteINI('Display', 'Line1', toptext)
-        fireNFX_Bridge.WriteINI('Display', 'Line2', midtext)
-        fireNFX_Bridge.WriteINI('Display', 'Line3', bottext)
-        
-        self.prn(lvlD, '  |-------------------------------------')
-        self.prn(lvlD, '  | ', toptext)
-        self.prn(lvlD, '  | ', midtext)
-        self.prn(lvlD, '  | ', bottext)
-        self.prn(lvlD, '  |-------------------------------------')
+        self.BridgeDisplayText1 = toptext
+        self.BridgeDisplayText2 = midtext
+        self.BridgeDisplayText3 = bottext  
 
-    def UpdateBridge(self, section, key, value):
-        pass 
+        self.UpdateBridge()
+        
+        # print('  |-------------------------------------')
+        # print('  | ', toptext)
+        # print('  | ', midtext)
+        # print('  | ', bottext)
+        # print('  |-------------------------------------')
+
+    def UpdateBridge(self):
+        print(' Updating Bridge ')
+        fireNFX_Bridge.WriteINI('Display', 'Line1', self.BridgeDisplayText1)
+        fireNFX_Bridge.WriteINI('Display', 'Line2', self.BridgeDisplayText2)
+        fireNFX_Bridge.WriteINI('Display', 'Line3', self.BridgeDisplayText3)
+
+        for idx, pad in enumerate(self.BridgeMacros.keys()): 
+            fireNFX_Bridge.WriteINI('Macros', 'macropad' + str(idx), self.BridgeMacros[pad].Name)
+            fireNFX_Bridge.WriteINI('Macros', 'macropadcolor' + str(idx), self.BridgeMacros[pad].PadColor)
+
 
 
     def RefreshCustomMacros(self):
@@ -3468,8 +3476,10 @@ class TFireNFX():
         colorlist.append(OrigColor)
 
         for idx, pad in enumerate(pdMacroNav):
-            fireNFX_Bridge.WriteINI('Macros', 'macropad' + str(idx), textlist[idx])
-            fireNFX_Bridge.WriteINI('Macros', 'macropadcolor' + str(idx), colorlist[idx]) 
+            # print(idx, pad, textlist[idx], colorlist[idx])
+            self.BridgeMacros[idx] = TnfxMacro(textlist[idx], colorlist[idx], None)
+            # fireNFX_Bridge.WriteINI('Macros', 'macropad' + str(idx), textlist[idx])
+            # fireNFX_Bridge.WriteINI('Macros', 'macropadcolor' + str(idx), colorlist[idx]) 
 
 
     def RefreshUDLR(self):
@@ -3547,6 +3557,7 @@ class TFireNFX():
             DisplayTimedText2('Browser', caption, actions )
         else:
             self.RefreshDisplay()
+            
 
     def RefreshBrowserButton(self):
         if(ui.getFocused(widBrowser)):
@@ -3827,7 +3838,7 @@ class TFireNFX():
         if(markerCount > 0):
             transport.setSongPos(1) # by starting at the end, we wrap around and find the first marker
             for m in range(markerCount):
-                markerNum = arrangement.jumpToMarker(1, False)
+                markerNum = arrangement.jumpToMarker(1, False) # return marker number 
                 markerName = arrangement.getMarkerName(markerNum)
                 markerTime = arrangement.currentTime(1) # returns in ticks
                 m = TnfxMarker(markerNum, markerName, markerTime)
@@ -4001,7 +4012,7 @@ class TFireNFX():
                 bColor = ChannelMap[currChan].PadAColor 
                 dimB =dimBright
                 if(Settings.SHOW_PIANO_ROLL_MACROS) and (PadMode.NavSet not in [nsPianoRoll, nsMixer, nsChannel, nsPlaylist]):
-                    self.ForceNaveSet(nsPianoRoll)
+                    self.ForceNavSet(nsPianoRoll)
             elif(PadMode.isTempNavSet()):
                 PadMode.RecallPrevNavSet()
                 self.RefreshNavPads()
@@ -4013,7 +4024,7 @@ class TFireNFX():
         if self.isNoMacros():
             return 
         else:
-            self.RefreshMacros()
+            self.RefreshMacroGrid()
 
         if(getCurrChanIdx() >= len(ChannelMap)):
             self.UpdateChannelMap()
@@ -4422,8 +4433,8 @@ class TFireNFX():
                     FPCChannels.append(chanIdx)
         return FPCChannels
         
-    def GetPatternMapActive(self):
-        return PatternMap[_CurrentPattern-1]
+    # def GetPatternMapActive(self):
+    #     return PatternMap[_CurrentPattern-1]
 
     def SetPadMode(self):
         self.RefreshShiftAltButtons()
@@ -4541,7 +4552,7 @@ class TFireNFX():
                     pl.ParamPadMaps = KNOWN_PLUGINS[baseEffectName].ParamPadMaps
                 else:
                     #print('GP NOT KNOWN', baseEffectName)
-                    pl = self.getPluginInfo(-1, False, False, slotIdx) # unknown, read the info
+                    pl = getPluginInfo(-1, False, False, slotIdx) # unknown, read the info
                 
                 #print('GP RESULT', pl.Name, pl.Type,  pl.ParamPadMaps)
 
@@ -4595,16 +4606,16 @@ class TFireNFX():
     def setSnapMode(self,newmode):
         ui.setSnapMode(newmode)
         i = 0
-        mode = ui.getSnapMode(self)
+        mode = ui.getSnapMode()
         while(mode < newmode):
             ui.snapMode(1)  # inc by 1
-            mode = ui.getSnapMode(self)
+            mode = ui.getSnapMode()
             i += 1
             if i > 100:
                 return
         while(mode > newmode):
             ui.snapMode(-1)  # inc by 1
-            mode = ui.getSnapMode(self)
+            mode = ui.getSnapMode()
             i += 1
             if i > 100:
                 return 
@@ -4832,6 +4843,8 @@ class TFireNFX():
         self.RefreshMacroGrid()
 
     def RefreshMacroGrid(self):
+        self.BridgeMacros.clear()
+
         if(PadMode.NavSet.ColorPicker):
             self.RefreshColorPicker()
         elif(PadMode.NavSet.CustomMacros):
@@ -4841,9 +4854,13 @@ class TFireNFX():
         else:
             self.RefreshMacros()
             self.RefreshNavPads()
+            self.RefreshGridLR()
+
+        self.UpdateBridge()
 
     def NavSetList(self,val):
         global PadMode 
+        # print('navsetlist', PadMode.AllowedNavSets, PadMode.CurrentNavSetIdx, val)
         newNavSetIdx = self.navigate(PadMode.AllowedNavSets, PadMode.CurrentNavSetIdx, val)
 
         # newNavSetIdx = PadMode.CurrentNavSetIdx + val 
@@ -4935,42 +4952,43 @@ class TFireNFX():
         if(bUpdateDisplay):
             DisplayTimedText('Piano Roll: ' + showText[showVal])
 
-    def ShowChannelSettings(self,showVal, bSave, bUpdateDisplay = False):
-        global PatternMap
-        global ShowCSForm
+    # def ShowChannelSettings(self,showVal, bSave, bUpdateDisplay = False):
+    #     global PatternMap
+    #     global ShowCSForm
 
-        currVal = 0
+    #     currVal = 0
 
-        # if(True):
-        #     self.ForceNaveSet(nsChannel, True)
+    #     # if(True):
+    #     #     self.ForceNaveSet(nsChannel, True)
 
-        if(len(PatternMap) > 0):
-            selPat = self.GetPatternMapActive() # PatternMap[_CurrentPattern-1]  # 0 based
-            currVal = selPat.ShowChannelSettings
+    #     if(len(PatternMap) > 0):
+    #         selPat = self.GetPatternMapActive() # PatternMap[_CurrentPattern-1]  # 0 based
+    #         currVal = selPat.ShowChannelSettings
 
-        if(showVal == -1):  # toggle
-            if(currVal == 0):
-                showVal = 1
-            else:
-                showVal = 0
+    #     if(showVal == -1):  # toggle
+    #         if(currVal == 0):
+    #             showVal = 1
+    #         else:
+    #             showVal = 0
         
-        chanNum = channels.selectedChannel(0, 0, 0)
-        channels.showCSForm(chanNum, showVal)
-        if(showVal == 0): # make CR active
-            self.ShowChannelRack(1)
-            ShowCSForm = False
-        else:
-            ShowCSForm = True
+    #     chanNum = channels.selectedChannel(0, 0, 0)
+    #     channels.showCSForm(chanNum, showVal)
+    #     if(showVal == 0): # make CR active
+    #         self.ShowChannelRack(1)
+    #         ShowCSForm = False
+    #     else:
+    #         ShowCSForm = True
 
-        if(bUpdateDisplay):
-            DisplayTimedText('Chan Sett: ' + showText[showVal])
+    #     if(bUpdateDisplay):
+    #         DisplayTimedText('Chan Sett: ' + showText[showVal])
 
-        self.OnRefresh(HW_Dirty_FocusedWindow)
-        self.RefreshChannelStrip()
+    #     self.OnRefresh(HW_Dirty_FocusedWindow)
+    #     self.RefreshChannelStrip()
 
-        if(bSave):
-            if(len(PatternMap) > 0):
-                selPat.ShowChannelSettings = showVal
+    #     if(bSave):
+    #         if(len(PatternMap) > 0):
+    #             selPat.ShowChannelSettings = showVal
+
 
     def ShowChannelEditor(self,showVal, bUpdateDisplay = False):
         global ChannelMap
@@ -5090,9 +5108,8 @@ class TFireNFX():
                 self.ForceNavSet(nsUDLR)
 
         else: # closing
-            if(self.isAutoHide):
+            if(isAutoHide):
                 if(resetAutoHide) :
-                    p('resetting AH')
                     ui.setBrowserAutoHide(True)
                     resetAutoHide = False
                     # if(ui.getVersion(0) > 20): # BUG: can't reopen pre FL 21, so we don't close it.
@@ -5110,13 +5127,14 @@ class TFireNFX():
             #     resetAutoHide = True
 
             if(Settings.FORCE_UDLR_ON_BROWSER):
-                if(PadMode.NavSet != nsUDLR):
-                    prevNavSet = PadMode.NavSet.NavSetID
-                    self.ForceNaveSet(nsUDLR)
+                self.ForceNavSet(PadMode.AllowedNavSets[0])
+                # if(PadMode.NavSet != nsUDLR):
+                #     prevNavSet = PadMode.NavSet.NavSetID
+                #     self.ForceNavSet(nsUDLR)
                 
-                if(prevNavSet > -1):
-                    self.ForceNaveSet(nsUDLR)
-                    prevNavSet = -1
+                # if(prevNavSet > -1):
+                #     self.ForceNavSet(nsUDLR)
+                #     prevNavSet = -1
         
         self.OnRefresh(HW_Dirty_FocusedWindow)
         if(bUpdateDisplay):
@@ -5431,13 +5449,14 @@ class TFireNFX():
             #TestLumi(0, cRed, mixer.getTrackPeaks(0, PEAK_LR))
             time.sleep(0.1)
 
-    def TestLumi(self,pad = 0, color = cPurple, peakval = 1, dim = 0):
+    def TestLumi(self, pad = 0, color = cPurple, peakval = 1, dim = 0):
         #
         r, g, b = ColorToRGB(color)
-        h, s, v = colorsys.rgb_tohsv(r, g, b)
+        
+        h, s, v = utils.RGBToHSV(r, g, b) # colorsys.rgb_tohsv(r, g, b)
         #print('input', r, g, b, ' and ', h, s, v )
         v = self.mapRange(peakval, 0.0, 1.0, 128, 254)
-        r, g, b = colorsys.hsv_torgb(h,s,v)
+        r, g, b = utils.HSVtoRGB(h, s, v) # colorsys.hsv_torgb(h,s,v)
         #print('output', r, g, b, ' and ', h, s, v )
         color = RGBToColor(int(r), int(g), int(b) )
         SetPadColor(pad, color, dim)
@@ -5449,7 +5468,7 @@ class TFireNFX():
         hue = 0.0
         step_val = 1.0 / num_steps
         for zz in range(num_steps):
-            rgb = colorsys.hsv_torgb(hue, 1, 1)
+            rgb = utils.HSVtoRGB(hue, 1, 1) # colorsys.hsv_torgb(hue, 1, 1)
             hue += step_val
             hue %= 1.0 # cap hue at 1.0
             maxrgb = 127 # 255

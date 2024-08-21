@@ -1,6 +1,5 @@
 # Fire device specific functions.
 
-import colorsys
 import device 
 import midi
 import utils 

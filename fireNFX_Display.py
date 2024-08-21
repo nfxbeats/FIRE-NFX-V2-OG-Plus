@@ -28,8 +28,8 @@ TextRowHeight = 20 #18 #was 20
 Idle_Interval = 100
 Idle_Interval_Max = 8
 
-ScreenActiveTimeout = 10 # seconds to keep screen active (screen has its own timeout which will kick in after this)
-ScreenAutoTimeout = 5
+ScreenActiveTimeout = 30 # seconds to keep screen active (screen has its own timeout which will kick in after this)
+ScreenAutoTimeout = 10
 
 tlNone = 1
 tlText = 1 << 1

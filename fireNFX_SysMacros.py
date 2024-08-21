@@ -87,18 +87,18 @@ CustomMacros = []
 
 if(len(Settings.DEFAULT_MACROS) > 0):
     MacroList.clear()
-    for idx, pad in enumerate(pdMacros):
-        if(idx < len(Settings.DEFAULT_MACROS)):
-            MacroList.append(Settings.DEFAULT_MACROS[idx])
-        elif(idx < len(DefaultMacros)):
-            MacroList.append(DefaultMacros[idx])
+    for macroIdx, padIdx in enumerate(pdMacros):
+        if(macroIdx < len(Settings.DEFAULT_MACROS)):
+            MacroList.append(Settings.DEFAULT_MACROS[macroIdx])
+        elif(macroIdx < len(DefaultMacros)):
+            MacroList.append(DefaultMacros[macroIdx])
         else:
             MacroList.append(TnfxMacro('', cOff, None)) # empty macro
 
 if(len(Settings.CUSTOM_MACROS) == 0):
-    for idx, pad in enumerate(pdMacroNav):
-        if(idx < len(Settings.CUSTOM_MACROS)):
-            CustomMacros.append(Settings.CUSTOM_MACROS[idx])
+    for macroIdx, padIdx in enumerate(pdMacroNav):
+        if(macroIdx < len(Settings.CUSTOM_MACROS)):
+            CustomMacros.append(Settings.CUSTOM_MACROS[macroIdx])
         else:
             CustomMacros.append(TnfxMacro('', cOff, None)) # empty macro
 

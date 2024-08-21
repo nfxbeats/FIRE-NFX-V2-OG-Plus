@@ -1,11 +1,12 @@
-import string 
 import sys
 import math
 import transport
 import time 
 import device
 from fireNFX_Classes import TnfxParameter, TnfxChannelPlugin, cpChannelPlugin, cpMixerPlugin #, _rd3d2PotParams 
+
 import utils
+
 import plugins
 import mixer
 import playlist
@@ -18,6 +19,7 @@ from fireNFX_Defs import *
 from fireNFX_DefaultSettings import *
 from fireNFX_FireUtils import *
 import fireNFX_Anim as anim
+
 
 # # enum code from https://stackoverflow.com/questions/36932/how-can-i-represent-an-enum-in-python
 def enum(**enums):
@@ -1010,12 +1012,7 @@ def random_integer(n, seed=None):
     return rand_value % (n + 1)  # Modulo n+1 to get a number between 0 and n
 
 def remove_non_printable(s):
-    printable = set(string.printable)
-    return ''.join(filter(lambda x: x in printable, s))
+    return ''.join(c for c in s if 32 <= ord(c) <= 126)
 
 # TestQuad("U", 1)
 # TestTraveler(16, 4, 'UDDD9R-R-R-R-R-R-R-R-R-R-R-R-R-99DDD9R-R-R-R-R-R-R-R-R-R-R-R-R-9-9', 0)        
-        
-        
-
-

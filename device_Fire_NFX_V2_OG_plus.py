@@ -3,18 +3,18 @@
 #
 # author: Nelson F. Fernandez Jr. <nfxbeats@gmail.com>
 #
-import sys 
-from fireNFX_Defs import *
-from FIRE_NFX_OG_plus import * 
-from FIRE_NFX_V2 import *
-from fireNFX_DefaultSettings import Settings 
+# import sys 
+from fireNFX_Defs import IDShift, IDAlt, IDRec
+from FIRE_NFX_OG_plus import TFire
+from FIRE_NFX_V2 import TFireNFX
+from fireNFX_DefaultSettings import Settings
 
-FireMode = 0 
-_ShiftHeld = False
-_AltHeld = False 
+FIREMODE = 0
+SHIFTHELD = False
+ALTHELD = False
 
 FireOG = TFire()
-FireNFX = TFireNFX() 
+FireNFX = TFireNFX()
 
 Fire = FireNFX
 
@@ -51,17 +51,17 @@ def CallEx(func, *args, **kwargs):
 
 
 def ToggleFireMode():
-    global FireMode
+    global FIREMODE
     global Fire 
 
-    if(FireMode == 0):
+    if(FIREMODE == 0):
         print('changing to FIRE-OG+ mode')
         Fire = FireOG
-        FireMode = 1
+        FIREMODE = 1
     else:
         print('changing to FIRE-NFX=V2 mode')
         Fire = FireNFX
-        FireMode = 0 
+        FIREMODE = 0 
 
 def OnInit():
     CallEx(Fire.OnInit)
@@ -76,8 +76,8 @@ def OnIdle():
     Fire.OnIdle()
 
 def OnMidiIn(event):
-    global _ShiftHeld
-    global _AltHeld
+    global SHIFTHELD
+    global ALTHELD
 
     ctrlID = event.data1
 
@@ -91,11 +91,11 @@ def OnMidiIn(event):
 
 
     if(ctrlID == IDShift):
-        _ShiftHeld = (event.data2 > 0)
+        SHIFTHELD = (event.data2 > 0)
     elif(ctrlID == IDAlt):
-        _AltHeld = (event.data2 > 0)
+        ALTHELD = (event.data2 > 0)
 
-    if(_AltHeld) and (IDRec == ctrlID and event.data2 == 0): # on release
+    if(ALTHELD) and (IDRec == ctrlID and event.data2 == 0): # on release
         event.handled = True
         OnDeInit()
         ToggleFireMode()
