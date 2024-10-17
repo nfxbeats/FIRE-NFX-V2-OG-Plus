@@ -3,7 +3,9 @@ from fireNFX_Utils import ColorToDelphiColor
 
 if(general.getVersion() >= 37):
     import configparser
-    INIFile = 'fireNFX_Bridge.ini'
+    import os
+
+    INIFile = os.getcwd() + '\\fireNFX_Bridge.ini'
 
     def WriteINI( section, key, value):
         try:

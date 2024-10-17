@@ -1817,7 +1817,7 @@ class TFireNFX():
                 transport.globalTransport(FPT_Metronome, 1)
             
             if(transport.isPlaying()):
-                transport.stop()
+                transport.start()
                 self.ResetBeatIndicators()
             else:
                 self.UpdateMarkerMap()
@@ -2456,6 +2456,7 @@ class TFireNFX():
                 # fireNFX_Bridge.WriteINI('Macros', 'macropadcolor' + str(idx), ColorWithAlpha( MacroList[idx].PadColor) )
 
     def RefreshMarkers(self):
+        return
         for pad in pdMarkers:
             idx = pdMarkers.index(pad)
             SetPadColor(pad, getShade(cOrange, shDim),dimNormal)
@@ -3434,7 +3435,7 @@ class TFireNFX():
         # print('  |-------------------------------------')
 
     def UpdateBridge(self):
-        print(' Updating Bridge ')
+        #print(' Updating Bridge ')
         fireNFX_Bridge.WriteINI('Display', 'Line1', self.BridgeDisplayText1)
         fireNFX_Bridge.WriteINI('Display', 'Line2', self.BridgeDisplayText2)
         fireNFX_Bridge.WriteINI('Display', 'Line3', self.BridgeDisplayText3)
@@ -3678,6 +3679,7 @@ class TFireNFX():
 
     #region Updates / Resets
     def UpdateAndRefreshProgressAndMarkers(self):
+        return
         self.UpdateMarkerMap()                
         self.UpdateProgressMap()
         self.RefreshProgress()

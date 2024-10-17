@@ -1,9 +1,15 @@
 import general 
 
+
+
 if(general.getVersion() >= 37):
     import json
+    import os
+
+    cwd = os.getcwd() + '\\' 
 
     def save_object(obj, file_path):
+        file_path = cwd + file_path        
         try:
             with open(file_path, 'w') as file:
                 json.dump(vars(obj), file, indent=4)
@@ -13,6 +19,7 @@ if(general.getVersion() >= 37):
             return False
 
     def load_object(obj, file_path):
+        file_path = cwd + file_path
         try:
             with open(file_path, 'r') as file:
                 settings_dict = json.load(file)
