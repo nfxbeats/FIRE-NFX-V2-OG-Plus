@@ -93,10 +93,13 @@ Alternatively, You can manually make the files by copy/renaming the files like t
 
 |Original Filename| |New Filename|
 |-----------------|-|------------|
-|```fireNFX_Settings.py```| renamed to |```fireNFX_UserSettings.py```|
-|```fireNFX_Macros.py```| renamed to |```fireNFX_UserMacros.py```|
+|```fireNFX_UserSettings_EXAMPLE_.py```| renamed to |```fireNFX_UserSettings.py```|
+|```fireNFX_UserMacros_EXAMPLE_.py```| renamed to |```fireNFX_UserMacros.py```|
 
 There is text inside each of the files to provide guidance on how to edit them properly.
+
+### *IMPORTANT Note For FL24 and up:* 
+As of FL24, the user settings are stored in ```Settings.json``` and this file is created automatically after the script runs for the first time.
 
 ## *Finally....*
 A 30 minute demo of some of the features in FIRE-NFX-V2 (2024):
@@ -115,7 +118,7 @@ Please leave me feedback/bug reports on one of the following:
 
 ## *Credits*
 Much of this work was helped along by the following:
-* Miguel Guthridge, aka HDSQ in the forums. His [FL Studio API Stubs](https://github.com/MiguelGuthridge/FL-Studio-API-Stubs) have been invaluable to me while developing. He's also a powerhouse of help in the forums and even has his own FL script - [Universal Controller Script](https://github.com/MiguelGuthridge/Universal-Controller-Script) - that supports several devices.
+* Maddy Guthridge, aka HDSQ in the forums. Their [FL Studio API Stubs](https://github.com/MaddyGuthridge/FL-Studio-API-Stubs) have been invaluable to me while developing. They are also a powerhouse of help in the forums and even has their own FL script - [Universal Controller Script](https://github.com/MaddyGuthridge/Universal-Controller-Script) - that supports several devices.
 * Anyone who gave me some honest and accurate feedback - you guys help tremendously with ideas and bugs, thank you.
 * The author of the original AKAI Fire python script - I don't know who it is specifically (Miro?). Thank for the great code to learn from..
 
