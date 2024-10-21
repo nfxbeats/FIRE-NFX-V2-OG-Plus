@@ -8,6 +8,7 @@ from fireNFX_Colors import *
 from fireNFX_DefaultSettings import Settings
 from fireNFX_Utils import getShade, shDark, shDim, shLight, shNorm, NavigateFLMenu
 from fireNFX_PadDefs import pdMacroNav, pdMacros
+import fireNFX_Persist as persist
 
 # code for macros
 def Undo():
@@ -82,18 +83,22 @@ PianoRollMacros = [macQuickQuantize, macQuickPRFix, macTransposePROctaveUp, macT
 DefaultMacros = [macCloseAll,  macTogChanRack, macTogPlaylist, macTogMixer, 
                   macUndo,      macCopy,        macCut,         macPaste ]
 
-MacroList = DefaultMacros
+MacroList = []
 CustomMacros = []
 
-if(len(Settings.DEFAULT_MACROS) > 0):
+# allows you to re-order the MacroList from Settings.DEFAULT_MACROS_ORDER 
+# The initial irder is in DefaultMacros.
+# for example, if DEFAULT_MACROS_ORDER = [0,1,2,3,7,5,6,4], it swaps Undo and Paste
+if (len(Settings.DEFAULT_MACROS_ORDER) > 0):
     MacroList.clear()
-    for macroIdx, padIdx in enumerate(pdMacros):
-        if(macroIdx < len(Settings.DEFAULT_MACROS)):
-            MacroList.append(Settings.DEFAULT_MACROS[macroIdx])
-        elif(macroIdx < len(DefaultMacros)):
-            MacroList.append(DefaultMacros[macroIdx])
-        else:
-            MacroList.append(TnfxMacro('', cOff, None)) # empty macro
+    for macroIdx in Settings.DEFAULT_MACROS_ORDER:
+        MacroList.append(DefaultMacros[macroIdx])
+else:
+    # use and save the default macro order
+    MacroList = DefaultMacros
+    Settings.DEFAULT_MACROS_ORDER = [0,1,2,3,4,5,6,7]
+    persist.save_object(Settings, 'Settings.json')
+
 
 if(len(Settings.CUSTOM_MACROS) == 0):
     for macroIdx, padIdx in enumerate(pdMacroNav):

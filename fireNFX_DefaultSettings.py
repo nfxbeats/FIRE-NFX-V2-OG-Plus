@@ -152,7 +152,7 @@ class TnfxDefaultSettings:
         self.SHOW_CUSTOM_MACROS = False
         self.WATCH_WINDOW_SWITCHING = False
 
-        self.DEFAULT_MACROS = []
+        self.DEFAULT_MACROS_ORDER = []
         self.CUSTOM_MACROS = []
 
         self.Pallette = pallette1

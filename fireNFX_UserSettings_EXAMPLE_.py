@@ -1,3 +1,8 @@
+# IMPORTANT: For FL24 or greater, please edit Settings.json instead. 
+# Settings.json gets created automatically after the first load of the script.
+#
+# For FL21 or less, you can use this file.
+#
 # This is the user setting file that will allow you set some custom parameters.
 #
 # To use this file, it must be renamed to exactly: "fireNFX_UserSettings.py"

@@ -1,4 +1,4 @@
-# This is the user macro file that will allow you set some custom macros.
+# This is a sample user macro file that will allow you set some custom macros.
 #
 # To use this file, it must be renamed to exactly: "fireNFX_UserMacros.py"
 # and exist in the same folder as the other scripts.
