@@ -101,6 +101,9 @@ There is text inside each of the files to provide guidance on how to edit them p
 ### *IMPORTANT Note For FL24 and up:* 
 As of FL24, the user settings are stored in ```Settings.json``` and this file is created automatically after the script runs for the first time.
 
+## FireNFX Bridge - Windows Helper App
+If you are running FL24 or greater on Windows, you can use a helper app to get realtime information about the macros and knob definitions. The app is located in the script folder inside a .ZIP file named ```fireNFX_Bridge.zip```. Please watch the video [Fire NFX Bridge App Video](https://youtu.be/Uyy_Ideo5Sw) to see how it works and how to install and set it up.
+
 ## *Finally....*
 A 30 minute demo of some of the features in FIRE-NFX-V2 (2024):
 
