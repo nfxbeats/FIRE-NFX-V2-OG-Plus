@@ -16,6 +16,8 @@ def Undo():
         general.undoUp()
     else:
         general.undo()    
+def Redo():
+    general.undoDown()
 
 def ZoomSelection(zoomVal = Settings.DBL_TAP_ZOOM):
     zStr = 'DDDDDDDD'[0:zoomVal]
@@ -56,10 +58,13 @@ def Rename():
 
 # BUILT-IN MACROS DEFINED HERE
 # 
+macNull = TnfxMacro("", cOff, None)
+
 macCloseAll = TnfxMacro("CloseAll", cOff, CloseAll) # special 
 macTogChanRack = TnfxMacro("ChanRack", cCyan) # internal
 macTogPlaylist = TnfxMacro("Playlist", cCyan) # internal 
 macTogMixer = TnfxMacro("Mixer", cCyan) # internal
+
 # 
 macUndo = TnfxMacro("Undo", getShade(cYellow, shNorm), Undo )
 macCopy = TnfxMacro("Copy", getShade(cBlue, shLight), ui.copy)
@@ -77,13 +82,21 @@ macQuickPRFix               = TnfxMacro("Quant/Art", getShade(cGreen, shNorm), Q
 macTransposePROctaveUp      = TnfxMacro("Oct Up", getShade(cBlue, shLight), TransposePROctaveUp)
 macTransposePROctaveDown    = TnfxMacro("Oct Down", getShade(cBlue, shDark), TransposePROctaveDown)
 
+#shifted
+macRedo = TnfxMacro("Redo", cYellow, Redo)
+
 PianoRollMacros = [macQuickQuantize, macQuickPRFix, macTransposePROctaveUp, macTransposePROctaveDown]
 
 # master macro list
 DefaultMacros = [macCloseAll,  macTogChanRack, macTogPlaylist, macTogMixer, 
                   macUndo,      macCopy,        macCut,         macPaste ]
 
+DefaultShiftMacros = [macNull,      macNull,        macNull,        macNull,
+                      macRedo,      macNull,        macNull,        macNull ]
+
+
 MacroList = []
+MacrosShiftList = DefaultShiftMacros
 CustomMacros = []
 
 # allows you to re-order the MacroList from Settings.DEFAULT_MACROS_ORDER 

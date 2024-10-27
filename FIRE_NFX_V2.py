@@ -1181,6 +1181,9 @@ class TFireNFX():
         if(PadMode.NavSet.CustomMacros):
             macro = CustomMacros[macIdx]
 
+        if(ShiftHeld):
+            macro = MacrosShiftList[macIdx]
+
         # print('Macro:', macro.Name, (macro.Execute==None))
         if(macro.Execute == None):
             if( macro.Name == "ChanRack"): #macIdx == 1):
