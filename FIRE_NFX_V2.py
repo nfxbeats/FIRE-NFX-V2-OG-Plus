@@ -2895,9 +2895,9 @@ class TFireNFX():
 
 
     def UpdateBridgeKnobs(self):
-        if Settings.DEVMODE in ["0"]:
-            fireNFX_Bridge.WriteINI('Knobs', 'ModeText', 'Not Yet Implemented')
-            return
+        # if Settings.DEVMODE in ["0"]:
+        #     fireNFX_Bridge.WriteINI('Knobs', 'ModeText', 'Not Yet Implemented')
+        #     return
         
         knobs  = ['', '', '', '']
         knobsa = ['', '', '', '']
