@@ -52,6 +52,23 @@ cMagenta    = pallette1["Magenta"]
 cWhite      = pallette1["White"]
 cBlack      = pallette1["Black"]
 
+SETTINGS_COLORS = {
+    "cRed": cRed,
+    "cOrange": cOrange,
+    "cYellow": cYellow,
+    "cLime": cLime,
+    "cGreen": cGreen,
+    "cTeal": cTeal,
+    "cCyan": cCyan,
+    "cBlue": cBlue,
+    "cPurple": cPurple,
+    "cMagenta": cMagenta,
+    "cWhite": cWhite,
+    "cBlack": cBlack,
+    "cOff": cOff,
+    "cChannel": cChannel
+}
+
 def SetPallette(p):
     global cWhite
     global cBlack

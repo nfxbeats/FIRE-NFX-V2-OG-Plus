@@ -110,6 +110,7 @@ else:
     # use and save the default macro order
     MacroList = DefaultMacros
     Settings.DEFAULT_MACROS_ORDER = [0,1,2,3,4,5,6,7]
+    print('Using default macro order: ', Settings.DEFAULT_MACROS_ORDER)
     persist.save_object(Settings, 'Settings.json')
 
 

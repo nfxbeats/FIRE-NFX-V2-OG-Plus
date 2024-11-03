@@ -10,8 +10,8 @@
 # thanks to GeorgBit (#GS comments in code) for velocity curve for accent mode featue.
 #
 
-VERSION = "2.2024.0821"
-print('VERSION ' + VERSION)   
+VERSION = "2.2024.1030"
+print('FIRE_NFX_V2.VERSION ' + VERSION)   
 
 import device
 import midi
@@ -80,6 +80,7 @@ class TFireNFX():
     def __init__(self):
         SetPallette(Settings.Pallette)
         if 'MISSING' in Settings.DEVMODE:
+            print('MISSING DEVMODE')
             Settings.add_field('DEVMODE', "0")
             persist.save_object(Settings, 'Settings.json')
 

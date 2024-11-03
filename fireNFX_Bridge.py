@@ -4,6 +4,10 @@ from fireNFX_Utils import ColorToDelphiColor
 if(general.getVersion() >= 37):
     import configparser
     import os
+    print('')
+    print('Your FireNFX Bridge App should use this folder: ')
+    print(' ', os.getcwd())
+    print('')
 
     INIFile = os.getcwd() + '\\fireNFX_Bridge.ini'
 
@@ -33,6 +37,9 @@ if(general.getVersion() >= 37):
         except Exception as e:
             print(e)
 else:
+    print('')
+    print('Your FL Version is not compatible with the FireNFX Bridge App.')
+    print('')    
     def WriteINI(section, key, value):
         #print('WriteINI() insufficient version ', general.getVersion(), 'requires version >= 37')
         pass

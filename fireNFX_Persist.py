@@ -1,5 +1,5 @@
 import general 
-
+from fireNFX_Colors import *
 
 
 if(general.getVersion() >= 37):
@@ -24,6 +24,16 @@ if(general.getVersion() >= 37):
             with open(file_path, 'r') as file:
                 settings_dict = json.load(file)
                 for key, value in settings_dict.items():
+                    if not isinstance(value, list) and not isinstance(value, dict): # don't process if its a list or dict
+                        if value in SETTINGS_COLORS.keys():
+                            # print(f"Setting Color {key} to {SETTINGS_COLORS[value]}")
+                            value = SETTINGS_COLORS[value]
+                    #     else:
+                    #         print(f"Setting {key} to {value}")
+                    #         pass
+                    # else:
+                    #     print(f"Setting {key} to {value}")
+                    #     pass 
                     setattr(obj, key, value)
             return True
         except Exception as e:

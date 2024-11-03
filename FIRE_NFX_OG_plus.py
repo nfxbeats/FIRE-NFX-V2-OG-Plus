@@ -2187,7 +2187,6 @@ class TFire():
         self.BtnMap[x + y * PadsStride] = Color
 
     def RefreshPerfMode(self, FirstTrackNum, LastTrackNum):
-
         OverviewColT = ((0x00000000, 0x00200000, 0x04200000), (0x00000110, 0x0000063F, 0x0400063F))
         OnLight = 0x48
         OffLight = -0x1A
@@ -2825,10 +2824,12 @@ class TFire():
             self.SendCC(IDPlay, val)
 
         for n in range(0, len(self.PlayingPads)):
-          if Value > 0:
-            self.AddPadDataCol(dataOut, self.PlayingPads[n][0], self.PlayingPads[n][1], self.PlayingPads[n][2])
-          else:
-            self.AddPadDataCol(dataOut, self.PlayingPads[n][0], self.PlayingPads[n][1], 0)
+          #NFX fix perfmode ghosting
+          if ( (playlist.getPerformanceModeState() == 1) and (self.CurrentMode == ModePerf)) or (playlist.getPerformanceModeState() == 0):
+            if Value > 0:
+                self.AddPadDataCol(dataOut, self.PlayingPads[n][0], self.PlayingPads[n][1], self.PlayingPads[n][2])
+            else:
+                self.AddPadDataCol(dataOut, self.PlayingPads[n][0], self.PlayingPads[n][1], 0)
 
         if len(dataOut) > 0:
             screen.unBlank(True)
