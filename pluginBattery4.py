@@ -296,6 +296,6 @@ pluginBattery4.addParamToGroup('ALL', TnfxParameter(4239, 'MIDI Channel 16 After
 
 # [ENABLING THE CUSTOM MAPPING]
 # Comment/Uncomment the next line to disable/enable the knob mappings. 
-#pluginBattery4.assignKnobs([0, 1, 2, 3, 4, 5, 6, 7]) 
+pluginBattery4.assignKnobs([4096, 4128, 2, 3, 4, 5, 6, 7]) 
  
 

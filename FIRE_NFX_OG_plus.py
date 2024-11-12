@@ -2296,7 +2296,8 @@ class TFire():
 
                 # steps
                 if not MuteSelOnly:
-                    ps = self.GetChanRackStartPos()
+                    ps = self.GetChanRackStartPos() 
+                    # print('PS',ps)
                     for p in range(ps, ps + 16):
                         blinking = False
                         playing = p == self.CurStep
@@ -2727,6 +2728,10 @@ class TFire():
 
     def SetChanRackStartPos(self, Value, Dispatch = True):
 
+        # NFX add logic to only change grid offset when needed
+        if Value == self.ChanRackStartPos:
+            return 
+
         if self.MultiDeviceMode != MultiDev_Slave:
             self.ChanRackStartPos = utils.Limited(Value, 0, patterns.patternMax() - 16) # TODO check slaves for bounds
 
@@ -2822,6 +2827,11 @@ class TFire():
 
         if not self.ShiftHeld:
             self.SendCC(IDPlay, val)
+
+        # NFX - moves the steps as it plays.
+        currentStep = mixer.getSongStepPos()
+        startPosition = (currentStep // 16) * 16
+        self.SetChanRackStartPos(startPosition)
 
         for n in range(0, len(self.PlayingPads)):
           #NFX fix perfmode ghosting
