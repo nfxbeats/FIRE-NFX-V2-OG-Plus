@@ -20,6 +20,11 @@ from fireNFX_DefaultSettings import *
 from fireNFX_FireUtils import *
 import fireNFX_Anim as anim
 
+cwd = ''
+
+if(general.getVersion() >= 37):
+    import os
+    cwd = os.getcwd() + '\\' 
 
 # # enum code from https://stackoverflow.com/questions/36932/how-can-i-represent-an-enum-in-python
 def enum(**enums):
@@ -102,7 +107,8 @@ def getPluginParam(chanIdx, paramIdx, prn = False, mixSlotIdx = -1): # -1 denote
     spclCnt = plugins.getPadInfo(chanIdx, mixSlotIdx, PAD_Count, paramIdx)
     if(hasCaption): # if(caption != ''):
         if prn:
-            print(varName + ".addParamToGroup('ALL', TnfxParameter(" + str(paramIdx) +", '" + caption +"', 0, '" + valuestr + "', " + str(bipolar) + ") )")
+            line = varName + ".addParamToGroup('ALL', TnfxParameter(" + str(paramIdx) +", '" + caption +"', 0, '" + valuestr + "', " + str(bipolar) + ") )"
+            print(line)
             # if( spclCnt > 0 ):
             #     semitone = plugins.getPadInfo(chanIdx, mixSlotIdx, PAD_Semitone, paramIdx)
             #     padcolor = plugins.getPadInfo(chanIdx, mixSlotIdx, PAD_Color, paramIdx)
@@ -183,7 +189,7 @@ def getPluginInfo(chanIdx, prn = False, inclBlanks = False, mixSlotIdx = -1):
     fileName = vname + '.py'
     if(prn):
         print('# -----[ COPY AFTER THIS LINE, BUT DO NOT INCLUDE ]--------------------------------------------------------')   
-        print('# Save this file as: "{}{}"'.format(sys.path[1],fileName))
+        print('# Save this file as: "{}{}"'.format(cwd, fileName))
         print('# ')
         print('#   PluginName: ', res.Name)
         print('#   Created by: ', '<your name here>')
@@ -248,6 +254,95 @@ def getPluginInfo(chanIdx, prn = False, inclBlanks = False, mixSlotIdx = -1):
             print('# -----[ COPY UP TO THIS LINE, BUT DO NOT INCLUDE ]---------------')   
         return ""
     return res 
+
+def GetPluginCode(chanIdx, Author = '', mixSlotIdx = -1): 
+    if(mixSlotIdx > -1):
+        if (chanIdx == -1):
+            chanIdx = mixer.trackNumber()
+    else:        
+        if chanIdx == -1:
+            chanIdx = channels.selectedChannel()
+
+    name, uname, vname = getPluginNames(chanIdx, mixSlotIdx)
+    res = TnfxChannelPlugin(name, uname)
+    res.Type = cpChannelPlugin
+    type = 'cpChannelPlugin'
+    if(mixSlotIdx > -1):
+        res.Type = cpMixerPlugin
+        type = 'cpMixerPlugin'
+
+    res.Parameters.clear()
+    pCnt = plugins.getParamCount(chanIdx, mixSlotIdx)
+    knobsSamples = []
+    varName =  vname
+    fileName = vname + '.py'
+    fullPath = '{}{}'.format(cwd, fileName)
+    output = []
+    output.append('# ')
+    output.append('#   PluginName: ' + res.Name)
+    output.append('#   Created by: ' + Author)
+    output.append('# ')
+    output.append('from fireNFX_Classes import TnfxParameter, TnfxChannelPlugin, cpChannelPlugin, cpMixerPlugin')
+    output.append('from fireNFX_PluginDefs import USER_PLUGINS')
+    output.append(varName + " = TnfxChannelPlugin('" + name + "', '', " + type + ")")
+    output.append("if({}.Name not in USER_PLUGINS.keys()):".format(varName))
+    output.append("    USER_PLUGINS[{}.Name] = {}".format(varName, varName))
+    output.append("    print('{} parameter definitions loaded.')".format(res.Name))
+    output.append(" ")
+
+    for paramIdx in range(0, pCnt):
+        _, _, var_name = getPluginNames(chanIdx, mixSlotIdx)
+        param = getPluginParam(chanIdx, paramIdx, False, mixSlotIdx)
+        if(param.Caption not in ['?', ''] and param.Offset > -1):
+            group = 'ALL'
+    
+            if('MIDI CC' in param.Caption):
+                group = 'MIDI CCs'
+            # varName + ".addParamToGroup('ALL', TnfxParameter(" + str(paramIdx) +", '" + caption +"', 0, '" + valuestr + "', " + str(bipolar) + ") )"
+            line = var_name + ".addParamToGroup('"+ group +"', TnfxParameter(" + str(param.Offset) +", '" + param.Caption +"', 0, '" + param.ValueStr + "', " + str(param.Bipolar) + ") )"
+            output.append(line)
+
+            if(len(knobsSamples) < 8):
+                knobsSamples.append(param)
+
+    output.append('# [PARAMETER OFFSETS] ')
+    output.append('# Notice, the code lines above contains the text "TnfxParameter(" followed by a number')
+    output.append('# That number represents the parameter offset for the parameter described on that line')
+    output.append('# You can use the parameter offset number to program your own USER Knob mappings below')
+    output.append("# ")
+
+    sampleCount = len(knobsSamples)
+
+    if(sampleCount > 0 ):
+        paramlist = []
+        for idx, sample in enumerate(knobsSamples):
+            if idx < 8:
+                paramlist.append(sample.Offset)
+            else:
+                break
+    
+    output.append('# [HOW TO SET CUSTOM KNOB MAPPINGS]')
+    output.append('# The assignKnobs() function takes a list of up to 8 parameter offsets.')
+    output.append('# The list must be in brackets like this [ 21, 12, 3, 7]. Max 8 offsets in list.')
+    output.append('# it assigns them in order from :')
+    output.append('#   USER1, KNOBS 1-4 as the first 4 params')
+    output.append('#   USER2, KNOBS 1-4 as the second 4 params')
+    output.append('')
+    output.append('# [ENABLING THE CUSTOM MAPPING]')
+    output.append("# Comment/Uncomment the next line to disable/enable the knob mappings. ")
+    output.append("#{}.assignKnobs({}) ".format(varName, str(paramlist)))
+    output.append(" ")
+    output.append("# [LAST STEP. DO NOT FORGET. NEEDED TO INCLUDE YOUR MAPPINGS] ")
+    output.append("# Add the following line (without the #) to the end of fireNFX_CustomPlugins.py")
+    output.append("#from {} import {}".format(varName, varName) )
+    output.append(' ')   
+
+    return output
+
+def MakePlugin(chanIdx, Author='Anonymous', mixSlotIdx = -1):
+    code = GetPluginCode(chanIdx, Author, mixSlotIdx) 
+    for line in code:
+        print(line) 
 
 def ShowPluginInfo(chanIdx):
     getPluginInfo(chanIdx, True)

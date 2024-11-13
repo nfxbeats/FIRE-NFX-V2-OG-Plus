@@ -10,8 +10,7 @@
 # thanks to GeorgBit (#GS comments in code) for velocity curve for accent mode featue.
 #
 
-VERSION = "2.2024.1030"
-print('FIRE_NFX_V2.VERSION ' + VERSION)   
+
 
 import device
 import midi

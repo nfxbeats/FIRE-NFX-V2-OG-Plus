@@ -4,6 +4,10 @@
 # author: Nelson F. Fernandez Jr. <nfxbeats@gmail.com>
 #
 # import sys 
+VERSION = "2.2024.1112"
+print('FIRE_NFX_V2_OG+.VERSION ' + VERSION)   
+
+from fireNFX_Persist import *
 from fireNFX_Defs import IDShift, IDAlt, IDRec
 from FIRE_NFX_OG_plus import TFire
 from FIRE_NFX_V2 import TFireNFX

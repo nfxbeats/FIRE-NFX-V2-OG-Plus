@@ -1,12 +1,29 @@
 import general 
 from fireNFX_Colors import *
 
-
 if(general.getVersion() >= 37):
     import json
     import os
+    import shutil
 
-    cwd = os.getcwd() + '\\' 
+    cwd = os.getcwd() + '\\'
+
+    def MakeFiles(filename):
+        source_path = cwd + filename + '_EXAMPLE.py'
+        destination_path = cwd + filename + '.py' 
+        if os.path.exists(destination_path):
+            print(filename + " file exists.")
+        else:
+            print("Making " + filename + ".")
+            # Open the source file in read mode and the destination file in write mode
+            with open(source_path, 'rb') as source_file:
+                with open(destination_path, 'wb') as destination_file:
+                    # Read from the source and write to the destination
+                    destination_file.write(source_file.read())            
+
+    MakeFiles('fireNFX_UserMacros')
+    MakeFiles('fireNFX_UserSettings')
+    MakeFiles('fireNFX_CustomPlugins')
 
     def save_object(obj, file_path):
         file_path = cwd + file_path        
@@ -39,6 +56,8 @@ if(general.getVersion() >= 37):
         except Exception as e:
             print(f"Error loading object {obj}: {e}")
             return False        
+        
+
 else:
     def save_object(obj, file_path):
         print('save_object() insufficient version ', general.getVersion(), 'requires version >= 37')
