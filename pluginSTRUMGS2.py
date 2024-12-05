@@ -456,3 +456,7 @@ plStrumGS2.assignParameterToUserKnob(KM_USER1, 1, TnfxParameter(4, 'Auto Strum',
 plStrumGS2.assignParameterToUserKnob(KM_USER1, 2, TnfxParameter(7, 'Chord Type',  0, 'Movable', False) )
 plStrumGS2.assignParameterToUserKnob(KM_USER1, 3, TnfxParameter(8, 'Voicing Pos', 0, 'Fret 1',  False) )
 # -----------------------------------------------------------------
+
+plStrumGS2.BankSelect = 4096
+plStrumGS2.PresetPrev = 4128
+plStrumGS2.PresetNext = 4128

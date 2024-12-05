@@ -25,6 +25,8 @@ def clonePluginParams(srcPlugin, destPlugin):
     destPlugin.InvertOctaves = srcPlugin.InvertOctaves
     destPlugin.isNative = srcPlugin.isNative 
     destPlugin.AlwaysRescan = srcPlugin.AlwaysRescan 
+    destPlugin.PresetPrev = srcPlugin.PresetPrev
+    destPlugin.PresetNext = srcPlugin.PresetNext
 
     for param in srcPlugin.Parameters:
         newParam = TnfxParameter(param.Offset, param.Caption, param.Value, param.ValueStr, param.Bipolar, param.StepsInclZero)
@@ -45,6 +47,26 @@ def clonePluginParams(srcPlugin, destPlugin):
     return destPlugin
 
 cpGlobal, cpChannel, cpChannelPlugin, cpMixer, cpMixerPlugin = range(5)
+
+class TMidiEvent:
+    def __init__(self):
+        self.handled = False
+        self.timestamp = 0
+        self.status = 0
+        self.data1 = 0
+        self.data2 = 0
+        self.port = 0
+        self.isIncrement = 0
+        self.res = 0.0
+        self.inEV = 0
+        self.outEV = 0
+        self.midiId = 0
+        self.midiChan = 0
+        self.midiChanEx = 0
+        self.SenderId = 0
+        self.pmeFlags = 0
+        self.sysexLen = 0
+        self.sysexData = 0
 
 class TnfxChannelPlugin:
     """
@@ -67,6 +89,8 @@ class TnfxChannelPlugin:
         self.Type = type
         self.InvertOctaves = False
         self.ParamPadMaps = []
+        self.PresetPrev = -1
+        self.PresetNext = -1
         for i in range(4):
             p = TnfxParameter(-1, '', i, '', False)
             self.User1Knobs.append(p)

@@ -254,7 +254,7 @@ class TFire():
         # self.SendCC(IDPatternUp, SingleColorHalfBright)
         # self.SendCC(IDPatternDown, SingleColorOff)
 
-        print("OG+")
+        print("OG+ Mode")
 
     def OnProjectLoad(self,status):
         pass 

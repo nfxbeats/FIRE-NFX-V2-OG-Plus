@@ -205,6 +205,8 @@ pluginreFXNexus.addParamToGroup('ALL', TnfxParameter(4239, 'MIDI Channel 16 Afte
 # [ENABLING THE CUSTOM MAPPING]
 # Comment/Uncomment the next line to disable/enable the knob mappings. 
 pluginreFXNexus.assignKnobs([0, 1, 2, 3, 4, 5, 6, 7]) 
+pluginreFXNexus.PresetPrev = 4192
+pluginreFXNexus.PresetNext = 4193
  
 # [LAST STEP. DO NOT FORGET. NEEDED TO INCLUDE YOUR MAPPINGS] 
 # Add the following line (without the #) to the end of fireNFX_CustomPlugins.py

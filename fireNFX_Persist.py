@@ -1,10 +1,11 @@
 import general 
 from fireNFX_Colors import *
 
+cwd = ''
+
 if(general.getVersion() >= 37):
     import json
     import os
-    import shutil
 
     cwd = os.getcwd() + '\\'
 
@@ -22,8 +23,49 @@ if(general.getVersion() >= 37):
                     destination_file.write(source_file.read())            
 
     MakeFiles('fireNFX_UserMacros')
-    MakeFiles('fireNFX_UserSettings')
+    #MakeFiles('fireNFX_UserSettings')
     MakeFiles('fireNFX_CustomPlugins')
+
+    def check_line_exists(file_path, line_to_check):
+        """
+        Checks if a specific line exists in a text file.
+
+        Parameters:
+        file_path (str): The path to the text file.
+        line_to_check (str): The line to search for, including any necessary line endings.
+
+        Returns:
+        bool: True if the line exists, False otherwise.
+        """
+        with open(file_path, 'r') as file:
+            for line in file:
+                if line == line_to_check:
+                    return True
+        return False
+
+    def add_line_to_file(file_path, line_to_add):
+        """
+        Adds a line to the end of a text file.
+
+        Parameters:
+        file_path (str): The path to the text file.
+        line_to_add (str): The line to add to the file. This function will automatically add a newline character.
+
+        """
+        with open(file_path, 'a') as file:
+            file.write(line_to_add + '\n')  # Adds the line with a newline at the end
+            
+
+    def save_code(code, file_path, overwrite=False):
+        if os.path.exists(file_path) and not overwrite:
+            print(file_path + " file exists. Nothing saved.")
+            return False
+        else:
+            print("Saving " + file_path + ".")
+            with open(file_path, 'w') as file:
+                for line in code:
+                    file.write(line + '\n') 
+            return True
 
     def save_object(obj, file_path):
         file_path = cwd + file_path        
@@ -66,3 +108,13 @@ else:
     def load_object(obj, file_path):
         print('load_object() insufficient version ', general.getVersion(), 'requires version >= 37')
         return False
+    
+    def save_code(code, file_path, overwrite=False):
+        print('save_code() insufficient version ', general.getVersion(), 'requires version >= 37')
+        return False 
+    
+    def check_line_exists(file_path, line_to_check):
+        print('check_line_exists() insufficient version ', general.getVersion(), 'requires version >= 37')
+
+    def add_line_to_file(file_path, line_to_add):
+        print('add_line_to_file() insufficient version ', general.getVersion(), 'requires version >= 37')

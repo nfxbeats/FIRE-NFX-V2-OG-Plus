@@ -2,4 +2,7 @@
 @copy /-y fireNFX_UserSettings_EXAMPLE_.py fireNFX_UserSettings.py
 @echo Copying User Macros...
 @copy /-y fireNFX_UserMacros_EXAMPLE_.py fireNFX_UserMacros.py
+@echo Copying User Macros...
+@copy /-y fireNFX_CustomPlugins_EXAMPLE_.py fireNFX_CustomPlugins.py
 @pause
+

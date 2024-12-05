@@ -107,7 +107,7 @@ class TFireNFX():
         # FIRE NFX V2 pattern lights
         # SendCC(IDPatternUp, SingleColorOff)
         # SendCC(IDPatternDown, SingleColorHalfBright)
-        print("FIRE NFX V2")
+        print("FIRE NFX V2 Mode")
 
         # Refresh the control button states        
         # Initialize Some lights
@@ -1106,10 +1106,33 @@ class TFireNFX():
         if(hPresetNav):
             if(padIdx in pdPresetNav):
                 self.ShowChannelEditor(1)
+
+                pluginName, _ = self.getCurrChanPluginNames()
+                plugin = self.getPlugin(pluginName)
+                # port = channels.getChannelMidiInPort(channels.selectedChannel())
+                # data2 = 0
+                # message = 179 + (data2 << 16) + (2 << 24) #XXX 
+                # print('plugin', plugin.Name, port, data2, plugin.CCPresetPrev, plugin.CCPresetNext)
+
+                recEventID = channels.getRecEventId(channels.selectedChannel())
+                if(not FLChannelFX) and (self.isGenPlug()): # for plugins/generators
+                    recEventID += REC_Chan_Plugin_First
+
                 if(padIdx == pdPresetPrev):
-                    ui.previous()
+                    if plugin.PresetPrev != -1:
+                        general.processRECEvent(recEventID + plugin.PresetPrev, 1, REC_MIDIController)
+                        # message = 179 + (plugin.CCPresetPrev << 8) + (data2 << 16) + (port << 24)
+                        # device.forwardMIDICC(message, 1)
+
+                    else:
+                        ui.previous()
                 elif(padIdx == pdPresetNext):
-                    ui.next()
+                    if plugin.PresetNext != -1:
+                        general.processRECEvent(recEventID + plugin.PresetNext, 1, REC_MIDIController)
+                        # message = 179 + (plugin.CCPresetNext << 8) + (data2 << 16) + (port << 24)
+                        # device.forwardMIDICC(message, 1)
+                    else:
+                        ui.next()
                 return True
         if(hPRNav):
             if(padIdx in pdNavMacros):
@@ -1566,7 +1589,7 @@ class TFireNFX():
 
             return True
 
-        chanNum = getCurrChanIdx() #  channels.channelNumber()
+        chanNum = getCurrChanIdx() #  channels.channelNumber()  xxx
         recEventID = channels.getRecEventId(chanNum)
 
         plID, plugin = self.getCurrChanPlugin()
@@ -1690,7 +1713,7 @@ class TFireNFX():
         knobres = 1/64
         if(stepsInclZero > 0):
             knobres = 1/stepsInclZero
-        # general.processRECEvent(recEventIDIndex, value, REC_MIDIController) doesnt support knobres
+        # general.processRECEvent(recEventIDIndex, value, REC_MIDIController) doesnt support knobres XXX
         
         if(value != 0): # value is the knob direction.  0 would mean no movement
             mixer.automateEvent(recEventIDIndex, value, REC_MIDIController, 0, 1, knobres) 
@@ -1945,7 +1968,8 @@ class TFireNFX():
         elif(not ShowMenu):
             if(ctrlID == IDSelectDown):
                 #HandleBrowserButton()
-                ui.enter()
+                #ui.enter()
+                ui.right()
             else:
                 numIdx = -1
                 name = ''
@@ -4536,7 +4560,7 @@ class TFireNFX():
         ui.scrollWindow(widPianoRoll, 1)
         ui.scrollWindow(widPianoRoll, 1, 1)
 
-    def getPlugin(self,pluginName, slotIdx = -1):
+    def getPlugin(self, pluginName, slotIdx = -1):
         ''' Loads the plugin from either (in this order):
 
             1) from knownPlugins if it exists

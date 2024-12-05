@@ -22,7 +22,6 @@ FireNFX = TFireNFX()
 
 Fire = FireNFX
 
-print('Starting up', Settings.STARTINOG)
 if Settings.STARTINOG:
     Fire = FireOG
 

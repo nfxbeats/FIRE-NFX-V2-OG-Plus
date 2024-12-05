@@ -19,6 +19,7 @@ from fireNFX_Defs import *
 from fireNFX_DefaultSettings import *
 from fireNFX_FireUtils import *
 import fireNFX_Anim as anim
+import fireNFX_Persist as persist
 
 cwd = ''
 
@@ -337,12 +338,19 @@ def GetPluginCode(chanIdx, Author = '', mixSlotIdx = -1):
     output.append("#from {} import {}".format(varName, varName) )
     output.append(' ')   
 
-    return output
+    return output, fullPath, varName
 
 def MakePlugin(chanIdx, Author='Anonymous', mixSlotIdx = -1):
-    code = GetPluginCode(chanIdx, Author, mixSlotIdx) 
-    for line in code:
-        print(line) 
+    code, dest_file, name = GetPluginCode(chanIdx, Author, mixSlotIdx)
+    include_text = f"from {name} import {name}"
+    persist.save_code(code, dest_file)
+    if persist.check_line_exists(cwd+'fireNFX_CustomPlugins.py', include_text):
+        print("Plugin already included in fireNFX_CustomPlugins.py")
+    else:
+        persist.add_line_to_file(cwd+'fireNFX_CustomPlugins.py', include_text)
+        print("Plugin added to fireNFX_CustomPlugins.py")
+        print('NOTE: YOU MUST RELOAD THE SCRIPT TO LOAD THE NEW PLUGIN')
+        
 
 def ShowPluginInfo(chanIdx):
     getPluginInfo(chanIdx, True)
@@ -458,7 +466,6 @@ def ProcessKeys(cmdStr):
 
 def NavigateFLMenu(cmdString = '', altmenu = False):
     # this code was inspired by HDSQ's implementation: 
-    # https://github.com/MiguelGuthridge/Universal-Controller-Script/blob/main/src/plugs/windows/piano_roll.py
     #
     if (ui.isInPopupMenu()):
         ui.closeActivePopupMenu()
