@@ -11,14 +11,25 @@ if(general.getVersion() >= 37):
 
     INIFile = os.getcwd() + '\\fireNFX_Bridge.ini'
 
-    def WriteINI( section, key, value):
+    def ClearINI():
         try:
-            #print('WriteINI()', section, key, value)
-            # Create a config parser object
+            # Create a new empty config
             config = configparser.ConfigParser()
+            # Write empty config to file, effectively clearing it
+            with open(INIFile, 'w') as configfile:
+                config.write(configfile)
+        except Exception as e:
+            print(e)
+
+    def WriteINI(section, key, value):
+        try:
+            # Create a config parser object that preserves case
+            config = configparser.ConfigParser()
+            config.optionxform = str  # This preserves key case
             
             # Read the existing file if it exists
-            config.read(INIFile)
+            if os.path.exists(INIFile):
+                config.read(INIFile)
             
             # Check if the section exists, if not add it
             if not config.has_section(section):
@@ -26,8 +37,9 @@ if(general.getVersion() >= 37):
             
             if 'olor' in key:
                 value = '${:08X}'.format(ColorToDelphiColor(value)) # value to delphi style hex
-
+            
             # Set the key-value pair in the section
+            # ConfigParser will automatically handle overwriting existing keys
             config.set(section, key, str(value))
             
             # Write the changes back to the file
@@ -42,4 +54,7 @@ else:
     print('')    
     def WriteINI(section, key, value):
         #print('WriteINI() insufficient version ', general.getVersion(), 'requires version >= 37')
+        pass
+
+    def ClearINI():
         pass

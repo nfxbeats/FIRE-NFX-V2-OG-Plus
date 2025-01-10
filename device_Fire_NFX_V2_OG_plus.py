@@ -4,7 +4,7 @@
 # author: Nelson F. Fernandez Jr. <nfxbeats@gmail.com>
 #
 # import sys 
-VERSION = "2.2024.1112"
+VERSION = "2.2025.0109"
 print('FIRE_NFX_V2_OG+.VERSION ' + VERSION)   
 
 from fireNFX_Persist import *

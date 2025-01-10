@@ -91,7 +91,7 @@ class TFireNFX():
         global User2Knobs
         global User3Knobs
 
-
+        fireNFX_Bridge.ClearINI()
 
         for knob in range(4):
             User1Knobs.append(TnfxUserKnob(knob))
