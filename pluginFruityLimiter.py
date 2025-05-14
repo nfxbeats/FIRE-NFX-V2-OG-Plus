@@ -28,6 +28,7 @@ pluginFruityLimiter.addParamToGroup('ALL', TnfxParameter(14, 'Comp RMS window', 
 pluginFruityLimiter.addParamToGroup('ALL', TnfxParameter(15, 'Noise gain', 0, '0.0dB  1.00', False) )
 pluginFruityLimiter.addParamToGroup('ALL', TnfxParameter(16, 'Noise threshold', 0, '-INFdB  0.00', False) )
 pluginFruityLimiter.addParamToGroup('ALL', TnfxParameter(17, 'Noise release time', 0, '50.01ms', False) )
+
 # [PARAMETER OFFSETS] 
 # Notice, the code lines above contains the text "TnfxParameter(" followed by a number
 # That number represents the parameter offset for the parameter described on that line
@@ -42,7 +43,7 @@ pluginFruityLimiter.addParamToGroup('ALL', TnfxParameter(17, 'Noise release time
 
 # [ENABLING THE CUSTOM MAPPING]
 # Comment/Uncomment the next line to disable/enable the knob mappings. 
-#pluginFruityLimiter.assignKnobs([0, 1, 2, 3, 4, 5, 6, 7]) 
+pluginFruityLimiter.assignKnobs([0, 1, 2, 3, 4, 5, 6, 7]) 
  
 # [LAST STEP. DO NOT FORGET. NEEDED TO INCLUDE YOUR MAPPINGS] 
 # Add the following line (without the #) to the end of fireNFX_PluginDefs.py

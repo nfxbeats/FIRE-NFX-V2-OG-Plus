@@ -91,6 +91,7 @@ class TnfxChannelPlugin:
         self.ParamPadMaps = []
         self.PresetPrev = -1
         self.PresetNext = -1
+        self.Perform = False # special mode to show when in Perform pad mode (not PL PErf mode)
         for i in range(4):
             p = TnfxParameter(-1, '', i, '', False)
             self.User1Knobs.append(p)

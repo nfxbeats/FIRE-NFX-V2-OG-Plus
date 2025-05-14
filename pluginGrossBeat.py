@@ -5,6 +5,7 @@ from fireNFX_Classes import TnfxParameter, TnfxChannelPlugin, cpChannelPlugin, c
 from fireNFX_PluginDefs import USER_PLUGINS
 from fireNFX_Colors import *
 pluginGrossBeat = TnfxChannelPlugin('Gross Beat', '', cpMixerPlugin)
+pluginGrossBeat.Perform = True
 if(pluginGrossBeat.Name not in USER_PLUGINS.keys()):
     USER_PLUGINS[pluginGrossBeat.Name] = pluginGrossBeat
     print('Gross Beat parameter definitions loaded.')
@@ -23,13 +24,13 @@ pdTimeMap = [  0,  1,  2,  3,  4,  5,  6,  7,
             16, 17, 18, 19, 20, 21, 22, 23,
             32, 33, 34, 35, 36, 37, 38, 39,
             48, 49, 50, 51, 52, 53, 54, 55,
-            -1, -1, -1, -1 ] # last four are to pad it to 36 total
+            -1, -1, -1, -1 ] # last four are to pad it to 36 total. needed to calculate the param value correctly
 
 pdVolMap = [  8,  9, 10, 11, 12, 13, 14, 15,
              24, 25, 26, 27, 28, 29, 30, 31,
              40, 41, 42, 43, 44, 45, 46, 47,
              56, 57, 58, 59, 60, 61, 62, 63,
-             -1, -1, -1, -1 ] # last four are to pad it to 36 total
+             -1, -1, -1, -1 ] # last four are to pad it to 36 total. needed to calculate the param value correctly
 
 timeMap = TnfxParamPadMapping(0, cGreen, pdTimeMap)
 volMap = TnfxParamPadMapping(1, cOrange, pdVolMap)

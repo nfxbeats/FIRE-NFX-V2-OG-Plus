@@ -17,10 +17,9 @@ FIREMODE = 0
 SHIFTHELD = False
 ALTHELD = False
 
-FireOG = TFire()
-FireNFX = TFireNFX()
-
-Fire = FireNFX
+FireOG = TFire()        # the OG+ version
+FireNFX = TFireNFX()    # the NFX version
+Fire = FireNFX          # set the default 
 
 if Settings.STARTINOG:
     Fire = FireOG

@@ -471,11 +471,9 @@ class TFire():
         return Result
 
     def GetStepParam(self, Step, Param):
-
         return channels.getStepParam(Step, Param, self.GetChanRackOfs(), self.GetChanRackStartPos(), PadsStride)
 
     def GetCurStepParam(self, ChanIndex, Param):
-
         return channels.getCurrentStepParam(ChanIndex, self.CurStep, Param)
 
     def GetDualKeybWhiteNoteVal(self, x, y):
@@ -934,7 +932,7 @@ class TFire():
     def OnMidiMsg(self, event):
 
         tempHeldPads = bytearray()
-        ParamNames = ('Step pitch', 'Velocity', 'Release', 'Fine pitch', 'Panning', 'Mod X', 'Mod Y', 'Shift')
+        ParamNames = ('Step pitch', 'Velocity', 'Release', 'Fine pitch', 'Panning', 'Mod X', 'Mod Y', 'Shift', 'Repeat')
         
         def SetStep(padNum, Force):
 
@@ -997,9 +995,11 @@ class TFire():
 
         def HandleHeldPadsParam(Data2, Param):
 
-            ParamDefVal = (DotNote_Default, 100, 64, 120, 64, 128, 128, 0)
-            ParamMax = (127, 127, 127, 240, 127, 255, 255, 255)
-            ParamInc = (1, 2, 2, 2, 2, 2, 2, 1)
+            #NFX added values for pRepeat
+            ParamDefVal = (DotNote_Default, 100,  64, 120,  64, 128, 128,   0,  8)
+            ParamMax =                (127, 127, 127, 240, 127, 255, 255, 255, 14)
+            ParamMin =                (  0,   0,   0,   0,   0,   0,   0,   0,  8) #NFX Added
+            ParamInc =                (  1,   2,   2,   2,   2,   2,   2,   1,  1)
             RecPPS = mixer.getRecPPS()
 
             for m in range(0, len(self.HeldPads)):
@@ -1028,10 +1028,14 @@ class TFire():
                 if Param == pShift: # other parameters will be limited by graph editor
                     oldVal = (oldVal // RecPPS) * RecPPS
                     val = utils.Limited(val, oldVal, oldVal + RecPPS - 1)
+
+                print('oldval = ', oldVal, 'val', val, 'max', ParamMax[Param], 'min', ParamMin[Param], 'Data2', Data2)
+                    
+
                 self.SetStepParam(self.HeldPads[m], Param, val)
 
                 if Param != pShift:
-                    val = utils.Limited(val, 0, ParamMax[Param])
+                    val = utils.Limited(val, ParamMin[Param], ParamMax[Param])
 
                 if m == 0:
                     if Param == pPitch:
@@ -1365,9 +1369,9 @@ class TFire():
                         elif event.data1 == IDKnob2:
                             HandleHeldPadsParam(event.data2, pPan)
                         elif event.data1 == IDKnob3:
-                            HandleHeldPadsParam(event.data2, pModX)
+                            HandleHeldPadsParam(event.data2, 8) # pModX)
                         elif event.data1 == IDKnob4:
-                            HandleHeldPadsParam(event.data2, pModY)
+                            HandleHeldPadsParam(event.data2, 8) # pModY)
 
                         self.HeldPadsChanged = True
                         self.ChangeFlag = True
@@ -1916,9 +1920,9 @@ class TFire():
                             elif event.data1 == IDKnob2:
                                 param = pPan
                             elif event.data1 == IDKnob3:
-                                param = pModX
+                                param = 8 # pRepeat
                             elif event.data1 == IDKnob4:
-                                param = pModY
+                                param = 8 # pModY
 
                             if len(self.HeldPads) > 0:
                                 p = self.HeldPads[0] - (self.HeldPads[0] // PadsStride) * PadsStride

@@ -343,7 +343,11 @@ class TFireNFX():
             if PadMode.IsAlt:
                 self.RefreshAltPerformanceMode()
             else:
-                self.RefreshPerformanceMode(Beat)
+                if playlist.getPerformanceModeState() == 1:
+                    self.RefreshPerformanceMode(Beat)
+                else:
+                    pass
+                    # self.RefreshPluginPerformanceMode()
 
     #gets calledd too often
     def OnDirtyMixerTrack(self,track):
@@ -482,24 +486,6 @@ class TFireNFX():
                 self.RefreshModes()
                 self.UpdateAndRefreshWindowStates()
 
-            #if(Settings.AUTO_SWITCH_TO_MAPPED_MIXER_EFFECTS):
-                #print('checking mixer effects')
-                # formCap = ui.getFocusedFormCaption()
-                # UpdateAndRefreshWindowStates()
-                # if(lastFocus in widDict.keys()):
-                #     print('=====> Changed to ', widDict[lastFocus], formCap)
-                #     pass
-                # elif(lastFocus == -1):
-                #     print('=====> None')
-                #     pass
-                # else:
-                #     slotIdx, uname, pname = GetActiveMixerEffectSlotInfo()
-                #     if isKnownMixerEffectActive():
-                #         RefreshModes()
-                #         RefreshEffectMapping() #GBMapTest()
-                #     else:
-                #         print("=====> FormCap ", formCap)
-                #         pass
 
 
         if(HW_Dirty_Performance & flags): # called when new channels or patterns added
@@ -738,10 +724,9 @@ class TFireNFX():
             
 
             # # handle effects when active
-            if(Settings.AUTO_SWITCH_TO_MAPPED_MIXER_EFFECTS) and self.isMixerMode(): 
-                #print('mixer effect mode', padNum)
-                #is an effect mapped?
-                if(self.isKnownMixerEffectActive()) and (padNum in ParamPadMapDict.keys()):
+            # print('AUTO_SWITCH_TO_MAPPED_MIXER_EFFECTS', Settings.AUTO_SWITCH_TO_MAPPED_MIXER_EFFECTS)
+            if(Settings.AUTO_SWITCH_TO_MAPPED_MIXER_EFFECTS) and (self.isKnownMixerEffectActive()):
+                if self.isMixerMode() and (padNum in ParamPadMapDict.keys()):
                     self.RefreshEffectMapping()
                     if(padNum in ParamPadMapDict.keys()):
                         self.ForceNavSet(nsNone)
@@ -1021,8 +1006,6 @@ class TFireNFX():
             slotIdx, slotName, pluginName = self.GetActiveMixerEffectSlotInfo()
             # get Param Value from the pressed pad 
             offset, value = ParamPadMapDict[padNum]
-            #value = ParamPadMapDict[padNum].GetValueFromPad(padNum)
-            #print('SetMixerPluginParamVal', offset, value, -1, slotIdx)
             SetMixerPluginParamVal(offset, value, -1, slotIdx)
             self.RefreshEffectMapping()
         return True
@@ -1548,6 +1531,9 @@ class TFireNFX():
 
         steps =  Settings.BROWSER_STEPS  # default
 
+        #print('ctrlID', ctrlID, 'value', event.outEv)
+
+
         if(event.isIncrement != 1):
             event.inEv = event.data2
             if event.inEv >= 0x40:
@@ -1556,6 +1542,8 @@ class TFireNFX():
                 event.outEv = event.inEv
             event.isIncrement = 1
         value = event.outEv
+
+        #print('ctrlID', ctrlID, 'value', value)
 
         if displayUpdateOnly:
             value = 0
@@ -1696,6 +1684,36 @@ class TFireNFX():
             if(  knobParam.Offset > -1  ): # valid offset?
                 return self.HandleKnobReal(recEventID + knobParam.Offset,  value, knobParam.Caption + ': ', knobParam.Bipolar)
             return True
+        elif self.isKnownMixerEffectActive() and (KnobMode in [KM_USER1, KM_USER2, KM_USER3] ): # mixer effect active, so use the mixer effect knobs
+                print('Mixer Effect Knobs')
+                mixerNum = mixer.getTrackInfo(TN_Sel)
+                mixerName = mixer.getTrackName(mixerNum) 
+                slotIdx, slotName, pluginName = self.GetActiveMixerEffectSlotInfo()
+                recEventID = mixer.getTrackPluginId(mixerNum, slotIdx)
+                plugin = self.getPlugin(pluginName, slotIdx)
+                print('Mixer Effect Knobs', mixerNum, mixerName, slotIdx, slotName, pluginName, recEventID, plugin)
+
+                if(plugin == None): # invalid plugin
+                    return True
+
+                knobOffs = ctrlID - IDKnob1
+                value = event.outEv
+                if displayUpdateOnly:
+                    value = 0
+                if(KnobMode == KM_USER1):
+                    knobParam = plugin.User1Knobs[knobOffs]
+                    knobParam.Caption = plugin.User1Knobs[knobOffs].Caption
+                if(KnobMode == KM_USER2):
+                    knobParam = plugin.User2Knobs[knobOffs]
+                    knobParam.Caption = plugin.User2Knobs[knobOffs].Caption
+                if(KnobMode == KM_USER3):
+                    knobParam = plugin.User3Knobs[knobOffs]
+                    knobParam.Caption = plugin.User3Knobs[knobOffs].Caption
+                if(  knobParam.Offset > -1  ): # valid offset?
+                    #return self.HandleKnobReal(recEventID + knobParam.Offset,  value, knobParam.Caption + ': ', knobParam.Bipolar)
+                    print('MEK', recEventID + knobParam.Offset,  value, knobParam.Caption + ': ', knobParam.Bipolar)
+                return True
+
         else:  #user modes..
             if (event.status in [MIDI_NOTEON, MIDI_NOTEOFF]):
                 event.handled = True
@@ -1802,6 +1820,7 @@ class TFireNFX():
                 if(checkFLVersionAtLeast('20.99.0')):
                     if(playlist.getPerformanceModeState() == 1): # in performance mode
                         PadMode = modePerform
+
         elif(AltHeld) and (not ShiftHeld): # Alt modes
             isShiftMode = False
             isAltMode = True 
@@ -1921,7 +1940,7 @@ class TFireNFX():
                     self.NavPerfTrackOffset(+16)
                 else:
                     self.NavPerfTrackOffset(-16)
-                self.UpdatePerformanceBlocks()            
+                # self.UpdatePerformanceBlocks()            
                 self.RefreshPerformanceMode(-1)
             return True
         elif(ui.getFocused(widBrowser)):
@@ -3637,11 +3656,11 @@ class TFireNFX():
         
         ParamPadMapDict.clear()
         slotIdx, slotName, pluginName = self.GetActiveMixerEffectSlotInfo()
-        print('REM', slotIdx, slotName, pluginName )
+        # print('REM', slotIdx, slotName, pluginName )
         pl = self.getPlugin(pluginName, slotIdx)
         #print('REM', pl)
         if (pl != None):
-            print('REM', pl.ParamPadMaps)
+            #  print('REM', pl.ParamPadMaps)
             for paramMap in pl.ParamPadMaps:
                 #print('REM PM1', paramMap)
                 currVal = GetMixerPluginParamVal(paramMap.Offset, 1, 0)
@@ -3668,10 +3687,28 @@ class TFireNFX():
             else:
                 SetPadColor(pad, 0x000000, 0) 
 
-    def RefreshPerformanceMode(self,beat):
-        if isPMESafe:
-            if(len(PerformanceBlocks.keys()) > 0):
+    def RefreshPluginPerformanceMode(self):
+        # print('RefreshPLUGINPerformanceMode', self.isKnownPlugin(), self.isKnownMixerEffectActive())
+        if(playlist.getPerformanceModeState() == 0): # not in PL perf mode
+            #check if there is a special effect to use (ie. Gross Beat)
+            # print('RefreshPerformanceMode Not PL')
+            plid = ''
+            pl = self.getPlugin(channels.selectedChannel())
+            if self.isKnownPlugin():
+                pl = self.getPlugin(channels.selectedChannel())   
+                if pl.Perform == True:
+                    pass #todo channel plugin mapping 
+            elif self.isKnownMixerEffectActive():
+                plid, pl = self.GetCurrMixerPlugin()
+                # print('RefreshPerformanceMode - Known', plid, len(pl.ParamPadMaps))        
+                if len(pl.ParamPadMaps) > 0:
+                    self.RefreshEffectMapping(False)
 
+    def RefreshPerformanceMode(self,beat):
+        if(playlist.getPerformanceModeState() == 0): # not in PL perf mode
+            return
+        if isPMESafe:
+            if(len(PerformanceBlocks.keys()) > 0): # in PL perf mode
                 for padNum in PerformanceBlocks.keys():
                     block = PerformanceBlocks[padNum]
                     block.Update()
@@ -3701,7 +3738,7 @@ class TFireNFX():
                     
             else:
                 self.UpdatePerformanceBlocks()
-    
+
     #endregion 
 
     #region Updates / Resets
@@ -4473,7 +4510,11 @@ class TFireNFX():
             if PadMode.IsAlt:
                 self.RefreshAltPerformanceMode()
             else:
-                self.RefreshPerformanceMode(-1)        
+                if playlist.getPerformanceModeState() == 1: # in performance mode
+                    self.RefreshPerformanceMode(-1)        
+                else:
+                    self.RefreshPluginPerformanceMode()
+
         self.RefreshPadModeButtons() # lights the button
         self.RefreshAll()
 
@@ -4583,7 +4624,7 @@ class TFireNFX():
                     #print('GP NOT KNOWN', baseEffectName)
                     pl = getPluginInfo(-1, False, False, slotIdx) # unknown, read the info
                 
-                #print('GP RESULT', pl.Name, pl.Type,  pl.ParamPadMaps)
+                # print('GP RESULT', pl.Name, pl.Type,  pl.ParamPadMaps, pl.Perform)
 
                 return pl
 
