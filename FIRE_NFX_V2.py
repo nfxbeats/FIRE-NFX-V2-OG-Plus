@@ -293,16 +293,16 @@ class TFireNFX():
                     self.ShowNote(note, True)
                 lastNote = note
 
-    def CheckAndRefreshSongLen(self):
-        global lastNote
-        global SongLen
-        global SHOW_PROGRESS
+    # def CheckAndRefreshSongLen(self):
+    #     global lastNote
+    #     global SongLen
+    #     global SHOW_PROGRESS
 
-        currSongLen = transport.getSongLength(SONGLENGTH_BARS)
-        if(currSongLen != SongLen): # song length has changed
-            if(SHOW_PROGRESS):
-                self.UpdateAndRefreshProgressAndMarkers()
-            SongLen = currSongLen
+    #     currSongLen = transport.getSongLength(SONGLENGTH_BARS)
+    #     if(currSongLen != SongLen): # song length has changed
+    #         if(SHOW_PROGRESS):
+    #             self.UpdateAndRefreshProgressAndMarkers()
+    #         SongLen = currSongLen
         
     def OnUpdateBeatIndicator(self,value):
         global Beat
@@ -330,7 +330,6 @@ class TFireNFX():
         isLastBar = transport.getSongPos(SONGLENGTH_BARS) == transport.getSongLength(SONGLENGTH_BARS)
 
         for i in range(0, len(BeatIndicators) ):
-            
             if(Beat >= i):
                 if(isLastBar):
                     SendCC(BeatIndicators[i], SingleColorHalfBright) # red
@@ -338,7 +337,12 @@ class TFireNFX():
                     SendCC(BeatIndicators[i], SingleColorFull) # green
             else:
                 SendCC(BeatIndicators[i], SingleColorOff)
-        
+
+        # if( PadMode.Mode == MODE_PATTERNS ) and 
+        if self.isPlaylistMode():
+            if(SHOW_PROGRESS):
+                self.UpdateAndRefreshProgressAndMarkers()   
+
         if(PadMode.Mode == MODE_PERFORM):
             if PadMode.IsAlt:
                 self.RefreshAltPerformanceMode()
@@ -445,7 +449,7 @@ class TFireNFX():
             if(PadMode.Mode == MODE_PATTERNS):
                 if(self.isPlaylistMode()):
                     self.RefreshPlaylist()
-                    self.RefreshProgress()
+                    self.UpdateAndRefreshProgressAndMarkers()
 
         if(HW_Dirty_LEDs & flags):
             self.RefreshTransport()
@@ -594,7 +598,7 @@ class TFireNFX():
 
         ctrlID = event.data1 # the low level hardware id of a button, knob, pad, etc
 
-        #self.prnt('OnMidiIn', ctrlID, event.data2)
+        # self.prnt('OnMidiIn', ctrlID, event.data2)
 
         # check for double tap
         if(event.data2 > 0) and (ctrlID not in [IDKnob1, IDKnob2, IDKnob3, IDKnob4, IDSelect]):
@@ -994,8 +998,8 @@ class TFireNFX():
             else:
                 arrangement.liveSelection(newSongPos, False) # clear
 
-        #UpdateAndRefreshProgressAndMarkers()
-        self.RefreshProgress()
+        self.UpdateAndRefreshProgressAndMarkers()
+        # self.RefreshProgress()
         self.RefreshDisplay()
         return True
 
@@ -3089,6 +3093,8 @@ class TFireNFX():
             PadMap[padTrackA].FLIndex = plTrack.FLIndex 
             PadMap[padMuteA].Color = muteColorA
             PadMap[padMuteA].FLIndex = plTrack.FLIndex 
+
+            #self.RefreshProgress() #will crash. do not do this here....
         
     def RefreshMixerEffectStrip(self,force = False):
         global MixerMap
@@ -3564,13 +3570,15 @@ class TFireNFX():
             #     fireNFX_Bridge.WriteINI('Macros', 'macropad' + str(idx + 8), arrow)
 
     def RefreshProgress(self):
-        if(PadMode.Mode == MODE_PATTERNS) and (self.isPlaylistMode(self)):
-            # if len(ProgressMapSong) == 0:
-            #     self.UpdateMarkerMap()
-            #     self.UpdateProgressMap()
+
+        if(PadMode.Mode == MODE_PATTERNS) and (self.isPlaylistMode()):
+            songLenBars = transport.getSongLength(SONGLENGTH_BARS)
+
+            if len(ProgressMapSong) == 0:
+                self.UpdateMarkerMap()
+                self.UpdateProgressMap()
             
             progMap = ProgressMapSong
-            songLenBars = transport.getSongLength(SONGLENGTH_BARS)
             progPads = self.getProgressPads()
             numPads = len(progPads)
             ticksPerBar = getAbsTicksFromBar(2) # returns the ticks in 1 bar 
@@ -3582,6 +3590,7 @@ class TFireNFX():
                 if pPad != None:
                     startBar = pPad.BarNumber
                     endBar = startBar + (barsPerPad - 1)
+
                     if(startBar < 1):
                         SetPadColor(pPad.PadIndex, cOff, dimBright)
                     elif(startBar <= currBar <= endBar ):
@@ -3743,7 +3752,6 @@ class TFireNFX():
 
     #region Updates / Resets
     def UpdateAndRefreshProgressAndMarkers(self):
-        return
         self.UpdateMarkerMap()                
         self.UpdateProgressMap()
         self.RefreshProgress()
@@ -4240,10 +4248,10 @@ class TFireNFX():
         return res 
 
     def isPlaylistMode(self,focusOnly = False):
-        res = (lastWindowID == widPlaylist)
-        if focusOnly or (not res):
-            res = ui.getFocused(widPlaylist)
-        return res
+        result = (lastWindowID == widPlaylist)
+        if focusOnly or (not result):
+            result = ui.getFocused(widPlaylist)
+        return result
 
     def isGenPlug(self,chan = -1):
         return (self.getChannelType(chan) in [CT_GenPlug])
