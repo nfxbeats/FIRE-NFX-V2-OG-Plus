@@ -23,6 +23,7 @@ if(general.getVersion() >= 37):
 
     def WriteINI(section, key, value):
         try:
+            # print('WriteINI(' + section + ', ' + key + ', ' + str(value) + ')')
             # Create a config parser object that preserves case
             config = configparser.ConfigParser()
             config.optionxform = str  # This preserves key case
@@ -48,6 +49,7 @@ if(general.getVersion() >= 37):
 
         except Exception as e:
             print(e)
+            ClearINI()
 else:
     print('')
     print('Your FL Version is not compatible with the FireNFX Bridge App.')
