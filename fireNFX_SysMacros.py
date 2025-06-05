@@ -46,6 +46,7 @@ def ShowScriptOutputWindow():
     NavigateFLMenu(',LLLLDDDDDDDDDDE')  # series of keys to pass
 
 def CloseAll():
+    print('CloseAll', Settings. REOPEN_WINDOWS_AFTER_CLOSE_ALL)
     transport.globalTransport(FPT_F12, 1)  # close all...
     if(Settings.REOPEN_WINDOWS_AFTER_CLOSE_ALL):
         ui.showWindow(widPlaylist)

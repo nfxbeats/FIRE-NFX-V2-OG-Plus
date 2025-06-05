@@ -3671,40 +3671,54 @@ class TFireNFX():
                 if len(pl.ParamPadMaps) > 0:
                     self.RefreshEffectMapping(False)
 
-    def RefreshPerformanceMode(self,beat):
+    def RefreshPerformanceMode(self, beat):
         if(playlist.getPerformanceModeState() == 0): # not in PL perf mode
-            return
+            return    
         if isPMESafe:
-            if(len(PerformanceBlocks.keys()) > 0): # in PL perf mode
+            # prnt('rpm  pad len', len(_PerformanceBlocks), 'offs', _PerfTrackOffset)
+            # print(*list(_PerformanceBlocks.values()), sep = '\n')
+            if(len(PerformanceBlocks.keys()) > 0):
+
                 for padNum in PerformanceBlocks.keys():
                     block = PerformanceBlocks[padNum]
                     block.Update()
                     status = block.LastStatus
                     color = block.Color
-                    dim = 2 # not active nor playing
-                    # if(playlist.isTrackMuted(block.FLTrackIndex)):
-                    #     dim = 3
-                    #     color = self.getShade(color, shDark)
-                    # else:
+                    dim = Settings.DIM_BRIGHT
+                    loopMode = playlist.getLiveLoopMode(block.FLTrackIndex)
+                    isMarch = (loopMode > 1)
+    
                     if( status == 0): # no block
                         color = cOff
                     else:
-                        isactive = (status & 2)
+                        isscheduled = bool(status & 2)
+                        isplaying = bool(status & 4)
 
-                        if isactive: # scheduled - AKA active
-                            dim = 0
-                            # color = AdjustColorBrightness(color, 1)
+                        if isplaying: 
+                            dim = Settings.DIM_BRIGHT
+                            color = cWhite 
                         else:
-                            dim = 2
+                            dim = Settings.DIM_BRIGHT
 
-                        if( status & 4) and not isactive: # playing
-                            if(beat in [0,2]): # or (ToBlinkOrNotToBlink):
-                                dim -= 1 
+                        if( isscheduled ): 
+                            if(beat in [0,2]): 
+                                if not isplaying:
+                                    if (loopMode == 1): 
+                                        dim = Settings.DIM_BRIGHT
+                                    else:
+                                        dim = Settings.DIM_DIM 
+                                else:
+                                    if(isMarch):
+                                        color = block.Color
+                                        dim = Settings.DIM_DIM
+                                    else:
+                                        dim = Settings.DIM_BRIGHT
+
 
                     SetPadColor(padNum, color, dim)
                     
             else:
-                self.UpdatePerformanceBlocks()
+                self.UpdatePerformanceBlocks()                
 
     #endregion 
 
@@ -3951,7 +3965,7 @@ class TFireNFX():
     def UpdatePerformanceBlockMap(self):
         global PerformanceBlockMap
 
-        self.prnt('upbm')
+        # self.prnt('upbm')
         width = 4
         if(playlist.getPerformanceModeState() == 1):
             self.UpdatePlaylistMap()
@@ -3964,7 +3978,7 @@ class TFireNFX():
             self.prnt('not in performance mode')
 
     def UpdatePerformanceBlocks(self,width = 4):
-        self.prnt('upb')
+        # self.prnt('upb')
         height = 4
         if playlist.getPerformanceModeState() == 1:
             tracksToShow = self.getTrackMatrix(PerfTrackOffset)
@@ -5524,7 +5538,7 @@ class TFireNFX():
         return Settings.SHOW_AUDIO_PEAKS and transport.isPlaying()
 
     def getTrackMatrix(self,startTrack):
-        self.prnt('gtm')
+        # self.prnt('gtm')
         res = []
         self.UpdatePerformanceBlockMap()
         # UpdatePlaylistMap()

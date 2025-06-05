@@ -252,3 +252,8 @@ prnLevels = [level0, levelE, levelH, levelR, levelU, levelD]
 
 FLEFFECTS = 'CHAN FX'
 NOSUPPTEXT = "UNSUPPORTED"
+
+LB_Status_Empty = 0 
+LB_Status_Filled = 1
+LB_Status_Scheduled = 2
+LB_Status_Playing = 4 

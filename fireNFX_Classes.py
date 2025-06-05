@@ -536,6 +536,7 @@ class TnfxPerformanceBlock:
     def getStatus(self):
         """Get the status of the performance block."""
         self.LastStatus = playlist.getLiveBlockStatus(self.FLTrackIndex, self.Number, midi.LB_Status_Default)
+        # self.LastStatus = playlist.getLiveBlockStatus(self.FLTrackIndex, self.Number, midi.LB_Status_Simple)
         return self.LastStatus
 
     def Update(self):
